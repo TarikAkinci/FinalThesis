@@ -1,0 +1,67 @@
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+500 items in the seeded 500-item D3CODE eval sample (entropy -0.000-2.305)
+
+Loading model: Qwen/Qwen2.5-7B-Instruct
+
+=== Exact token-matched pairs (this model's tokenizer) ===
+  religion_muslim             4 tok  <->   4 tok  "You are tall."
+  gender_woman                5 tok  <->   5 tok  "You are punctual."
+  region_western_europe       7 tok  <->   7 tok  "You are an early riser."
+  region_arab_culture         9 tok  <->   9 tok  "You are someone who prefers tea over coffee."
+
+=== Run plan: 83 unique (variant, condition) pairs ===
+  breadth    17 pairs
+  structure  25 pairs
+  matched    48 pairs
+  context    12 pairs
+Preflight OK: all spans located for all 83 (variant, condition) pairs on 3 sample items.
+Loading weights, then moving to cuda
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights:   6%|▌         | 21/339 [00:00<00:03, 96.24it/s]Loading weights:   9%|▉         | 31/339 [00:00<00:03, 79.37it/s]Loading weights:  17%|█▋        | 56/339 [00:00<00:02, 115.14it/s]Loading weights:  20%|██        | 68/339 [00:00<00:02, 99.33it/s] Loading weights:  23%|██▎       | 79/339 [00:00<00:03, 68.99it/s]Loading weights:  26%|██▌       | 87/339 [00:01<00:04, 59.09it/s]Loading weights:  28%|██▊       | 96/339 [00:01<00:04, 56.12it/s]Loading weights:  40%|███▉      | 135/339 [00:01<00:02, 86.75it/s]Loading weights:  42%|████▏     | 144/339 [00:01<00:02, 66.81it/s]Loading weights:  45%|████▍     | 151/339 [00:02<00:02, 64.02it/s]Loading weights:  47%|████▋     | 159/339 [00:02<00:02, 66.35it/s]Loading weights:  51%|█████▏    | 174/339 [00:02<00:02, 73.69it/s]Loading weights:  55%|█████▌    | 187/339 [00:02<00:01, 76.71it/s]Loading weights:  58%|█████▊    | 195/339 [00:02<00:02, 51.02it/s]Loading weights:  61%|██████    | 206/339 [00:02<00:02, 57.97it/s]Loading weights:  63%|██████▎   | 213/339 [00:03<00:02, 49.04it/s]Loading weights:  65%|██████▌   | 221/339 [00:03<00:02, 48.40it/s]Loading weights:  67%|██████▋   | 227/339 [00:03<00:02, 43.46it/s]Loading weights:  71%|███████   | 240/339 [00:03<00:01, 59.15it/s]Loading weights:  73%|███████▎  | 248/339 [00:03<00:01, 52.04it/s]Loading weights:  75%|███████▌  | 255/339 [00:03<00:01, 54.68it/s]Loading weights:  77%|███████▋  | 262/339 [00:04<00:01, 42.32it/s]Loading weights:  79%|███████▉  | 268/339 [00:04<00:01, 45.16it/s]Loading weights:  82%|████████▏ | 277/339 [00:04<00:01, 52.82it/s]Loading weights:  84%|████████▍ | 284/339 [00:04<00:01, 48.35it/s]Loading weights:  87%|████████▋ | 294/339 [00:04<00:00, 53.50it/s]Loading weights:  88%|████████▊ | 300/339 [00:04<00:00, 46.79it/s]Loading weights:  92%|█████████▏| 311/339 [00:05<00:00, 59.59it/s]Loading weights:  94%|█████████▍| 318/339 [00:05<00:00, 53.28it/s]Loading weights:  97%|█████████▋| 328/339 [00:05<00:00, 58.66it/s]Loading weights:  99%|█████████▉| 335/339 [00:05<00:00, 58.03it/s]Loading weights: 100%|██████████| 339/339 [00:05<00:00, 61.40it/s]
+/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/cuda/__init__.py:484: UserWarning: Found GPU0 Tesla V100-PCIE-16GB which is of compute capability (CC) 7.0.
+The following list shows the CCs this version of PyTorch was built for and the hardware CCs it supports:
+- 7.5 which supports hardware CC >=7.5,<8.0
+- 8.0 which supports hardware CC >=8.0,<9.0 except {8.7}
+- 8.6 which supports hardware CC >=8.6,<9.0 except {8.7}
+- 9.0 which supports hardware CC >=9.0,<10.0
+- 10.0 which supports hardware CC >=10.0,<11.0 except {10.1}
+- 12.0 which supports hardware CC >=12.0,<13.0
+Your installed torch==2.14.0+cu130 does not include kernels for this GPU. Reinstall the same version against a CUDA build that does, e.g.:
+  For CUDA 12.6 use pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cu126
+  _warn_unsupported_code(d, device_cc, code_ccs)
+
+=== Stage 1: baseline pass over all 500 items ===
+Traceback (most recent call last):
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/master_grid.py", line 559, in <module>
+    pred, prob, attn_lh, tokens = run_one(prompt)
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/master_grid.py", line 471, in run_one
+    out = model(**inputs, output_attentions=True)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 452, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/output_capturing.py", line 286, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 356, in forward
+    inputs_embeds = self.embed_tokens(input_ids)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/sparse.py", line 189, in forward
+    return F.embedding(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/functional.py", line 2621, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+torch.AcceleratorError: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+
