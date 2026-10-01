@@ -1,0 +1,65 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Selected 500 human-disagreement items (227 region, 273 gender)
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.59it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.74it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.81it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.40it/s]
+  100/2000
+  200/2000
+  300/2000
+  400/2000
+  500/2000
+  600/2000
+  700/2000
+  800/2000
+  900/2000
+  1000/2000
+  1100/2000
+  1200/2000
+  1300/2000
+  1400/2000
+  1500/2000
+  1600/2000
+  1700/2000
+  1800/2000
+  1900/2000
+  2000/2000
+
+Note: 4 item(s) qualified for both disagreement axes independently -- handled correctly via (item_id, axis) keys, not a bug.
+
+Saved results/disagreement_scaled/disagreement_scaled_items.csv and results/disagreement_scaled/disagreement_scaled_results.csv
+
+=== Flip rate by condition (n=500 items, all with gap >= 0.3) ===
+                                  mean  sum  count
+axis   condition                                  
+gender gender_man             0.025641    7    273
+       gender_woman           0.036630   10    273
+       placebo                0.054945   15    273
+region placebo                0.110132   25    227
+       region_arab_culture    0.123348   28    227
+       region_western_europe  0.079295   18    227
+
+=== Does the SIZE of the human disagreement gap predict a bigger model shift? (Spearman) ===
+  gender   (n=273): gap vs |delta P(yes)|: rho=-0.023 p=0.7082   gap vs pct_demographic_norm: rho=+0.056 p=0.3597
+  region   (n=227): gap vs |delta P(yes)|: rho=-0.208 p=0.001648   gap vs pct_demographic_norm: rho=-0.006 p=0.9295
+
+=== Mean |delta P(yes)| vs baseline, by condition (does the probability move even without a flip?) ===
+                                  mean  mean_abs_delta       std
+axis   condition                                                
+gender gender_man             0.024500        0.043519  0.098665
+       gender_woman           0.013734        0.051758  0.113024
+       placebo               -0.050747        0.074397  0.115836
+region placebo               -0.078837        0.114540  0.153603
+       region_arab_culture    0.078028        0.124302  0.209469
+       region_western_europe  0.071438        0.087303  0.151817
+
+=== Placebo check: paired Wilcoxon, real demographic prefix vs placebo prefix, pct_demographic_norm ===
+  gender  : mean_demo=0.0590  mean_placebo=0.0747  mean_diff=-0.0157  frac_demo_higher=0.00  n=273  p=1.591e-46
+  region  : mean_demo=0.0841  mean_placebo=0.0760  mean_diff=+0.0081  frac_demo_higher=0.97  n=227  p=1.32e-35
+
+=== Placebo check: paired Wilcoxon, real demographic vs placebo, |delta P(yes)| ===
+  gender  : mean_abs_delta_demo=0.0476  mean_abs_delta_placebo=0.0744  mean_diff=-0.0268  n=273  p=1.44e-13
+  region  : mean_abs_delta_demo=0.1058  mean_abs_delta_placebo=0.1145  mean_diff=-0.0087  n=227  p=0.0008702
+
+Saved 8 illustrative attention heatmaps to figures/disagreement_scaled/attention_heatmaps_scaled/
+Saved 2 illustrative content-attention charts to figures/disagreement_scaled/content_attention_charts_scaled/

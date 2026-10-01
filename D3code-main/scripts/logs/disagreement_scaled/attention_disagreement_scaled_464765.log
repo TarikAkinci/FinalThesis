@@ -1,0 +1,74 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Selected 500 human-disagreement items (227 region, 273 gender)
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:17,  5.73s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:11,  5.94s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:17<00:05,  5.87s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.07s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.73s/it]
+  100/2000
+  200/2000
+  300/2000
+  400/2000
+  500/2000
+  600/2000
+  700/2000
+  800/2000
+  900/2000
+  1000/2000
+  1100/2000
+  1200/2000
+  1300/2000
+  1400/2000
+  1500/2000
+  1600/2000
+  1700/2000
+  1800/2000
+  1900/2000
+  2000/2000
+
+Saved results/disagreement_scaled/disagreement_scaled_items.csv and results/disagreement_scaled/disagreement_scaled_results.csv
+
+=== Flip rate by condition (n=500 items, all with gap >= 0.3) ===
+                                  mean  sum  count
+axis   condition                                  
+gender gender_man             0.024561    7    285
+       gender_woman           0.035088   10    285
+       placebo                0.063158   18    285
+region placebo                0.117155   28    239
+       region_arab_culture    0.117155   28    239
+       region_western_europe  0.075314   18    239
+
+=== Does the SIZE of the human disagreement gap predict a bigger model shift? (Spearman) ===
+  gender   (n=273): gap vs |delta P(yes)|: rho=-0.024 p=0.6879   gap vs pct_demographic_norm: rho=+0.071 p=0.2454
+  region   (n=227): gap vs |delta P(yes)|: rho=-0.208 p=0.001648   gap vs pct_demographic_norm: rho=-0.006 p=0.9295
+
+=== Mean |delta P(yes)| vs baseline, by condition (does the probability move even without a flip?) ===
+                                  mean  mean_abs_delta       std
+axis   condition                                                
+gender gender_man             0.027470        0.045689  0.099838
+       gender_woman           0.018387        0.054812  0.116438
+       placebo               -0.052412        0.075066  0.115790
+region placebo               -0.079412        0.113322  0.151653
+       region_arab_culture    0.080221        0.124215  0.206578
+       region_western_europe  0.073224        0.088294  0.150590
+
+=== Placebo check: paired Wilcoxon, real demographic prefix vs placebo prefix, pct_demographic_norm ===
+Traceback (most recent call last):
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_disagreement_scaled.py", line 310, in <module>
+    merged = pd.DataFrame({"demo": demo_mean_per_item, "placebo": placebo_per_item}).dropna()
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/frame.py", line 782, in __init__
+    mgr = dict_to_mgr(data, index, columns, dtype=dtype, copy=copy, typ=manager)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/internals/construction.py", line 503, in dict_to_mgr
+    return arrays_to_mgr(arrays, columns, index, dtype=dtype, typ=typ, consolidate=copy)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/internals/construction.py", line 119, in arrays_to_mgr
+    arrays, refs = _homogenize(arrays, index, dtype)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/internals/construction.py", line 611, in _homogenize
+    val = val.reindex(index, copy=False)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/series.py", line 5172, in reindex
+    return super().reindex(
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/generic.py", line 5632, in reindex
+    return self._reindex_axes(
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/generic.py", line 5655, in _reindex_axes
+    new_index, indexer = ax.reindex(
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/core/indexes/base.py", line 4436, in reindex
+    raise ValueError("cannot reindex on an axis with duplicate labels")
+ValueError: cannot reindex on an axis with duplicate labels

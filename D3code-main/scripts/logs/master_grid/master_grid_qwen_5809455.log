@@ -1,0 +1,94 @@
+500 items in the seeded 500-item D3CODE eval sample (entropy -0.000-2.305)
+
+Loading model: Qwen/Qwen2.5-7B-Instruct
+
+=== Exact token-matched pairs (this model's tokenizer) ===
+  religion_muslim             4 tok  <->   4 tok  "You are tall."
+  gender_woman                5 tok  <->   5 tok  "You are punctual."
+  region_western_europe       7 tok  <->   7 tok  "You are an early riser."
+  region_arab_culture         9 tok  <->   9 tok  "You are someone who prefers tea over coffee."
+
+=== Run plan: 63 unique (variant, condition) pairs ===
+  breadth    17 pairs
+  structure  15 pairs
+  matched    32 pairs
+  context    12 pairs
+Preflight OK: all spans located for all 63 (variant, condition) pairs on 3 sample items.
+Loading weights, then moving to cuda
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights:   9%|▉         | 31/339 [00:00<00:01, 278.28it/s]Loading weights:  17%|█▋        | 59/339 [00:00<00:02, 115.93it/s]Loading weights:  22%|██▏       | 76/339 [00:00<00:03, 85.59it/s] Loading weights:  26%|██▌       | 88/339 [00:00<00:02, 90.93it/s]Loading weights:  29%|██▉       | 100/339 [00:01<00:03, 70.31it/s]Loading weights:  32%|███▏      | 109/339 [00:01<00:04, 56.00it/s]Loading weights:  34%|███▍      | 116/339 [00:01<00:04, 54.02it/s]Loading weights:  37%|███▋      | 127/339 [00:01<00:03, 63.78it/s]Loading weights:  40%|███▉      | 135/339 [00:01<00:03, 56.85it/s]Loading weights:  42%|████▏     | 144/339 [00:01<00:03, 60.28it/s]Loading weights:  45%|████▍     | 151/339 [00:02<00:03, 55.69it/s]Loading weights:  47%|████▋     | 158/339 [00:02<00:03, 57.29it/s]Loading weights:  49%|████▊     | 165/339 [00:02<00:03, 55.42it/s]Loading weights:  51%|█████▏    | 174/339 [00:02<00:02, 56.02it/s]Loading weights:  55%|█████▍    | 185/339 [00:02<00:03, 50.12it/s]Loading weights:  59%|█████▊    | 199/339 [00:02<00:02, 65.17it/s]Loading weights:  61%|██████    | 207/339 [00:03<00:02, 60.77it/s]Loading weights:  63%|██████▎   | 214/339 [00:03<00:02, 54.03it/s]Loading weights:  65%|██████▍   | 220/339 [00:03<00:02, 53.77it/s]Loading weights:  67%|██████▋   | 226/339 [00:03<00:02, 51.58it/s]Loading weights:  70%|██████▉   | 236/339 [00:03<00:01, 61.78it/s]Loading weights:  72%|███████▏  | 245/339 [00:03<00:01, 65.57it/s]Loading weights:  75%|███████▍  | 254/339 [00:04<00:01, 46.18it/s]Loading weights:  79%|███████▉  | 267/339 [00:04<00:01, 53.91it/s]Loading weights:  82%|████████▏ | 277/339 [00:04<00:01, 55.80it/s]Loading weights:  86%|████████▌ | 290/339 [00:04<00:00, 66.40it/s]Loading weights:  88%|████████▊ | 298/339 [00:04<00:00, 64.89it/s]Loading weights:  91%|█████████ | 309/339 [00:04<00:00, 69.04it/s]Loading weights:  94%|█████████▎| 317/339 [00:04<00:00, 70.16it/s]Loading weights:  96%|█████████▌| 325/339 [00:05<00:00, 70.85it/s]Loading weights: 100%|██████████| 339/339 [00:05<00:00, 66.43it/s]
+/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/driver.c:9:10: fatal error: Python.h: No such file or directory
+    9 | #include <Python.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+
+=== Stage 1: baseline pass over all 500 items ===
+Traceback (most recent call last):
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/master_grid.py", line 470, in <module>
+    pred, prob, attn_lh, tokens = run_one(prompt)
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/master_grid.py", line 399, in run_one
+    out = model(**inputs, output_attentions=True)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 452, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/utils/output_capturing.py", line 286, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 385, in forward
+    position_embeddings = self.rotary_emb(hidden_states, position_ids)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/modeling_rope_utils.py", line 128, in wrapper
+    return rope_forward(self, x, position_ids, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 97, in forward
+    freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_native/registry.py", line 956, in eager_router
+    result = _dispatch(args, kwargs, swallow_cond_exceptions=False)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_native/registry.py", line 935, in _dispatch
+    return getattr(torch.ops._native, impl_name)(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_ops.py", line 1350, in __call__
+    return self._op(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_native/ops/bmm_outer_product/triton_impl.py", line 27, in _bmm_outer_product_impl
+    return bmm_outer_product(a, b)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_native/ops/bmm_outer_product/triton_kernels.py", line 87, in bmm_outer_product
+    _bmm_outer_product_kernel[(B * triton.cdiv(M, BLOCK_M) * triton.cdiv(N, BLOCK_N),)](
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/torch/_native/instrumentation.py", line 208, in wrapper
+    return fn(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/jit.py", line 374, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/jit.py", line 731, in run
+    device = driver.active.get_current_device()
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/driver.py", line 39, in active
+    self._active = self.default
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/driver.py", line 33, in default
+    self._default = _create_driver()
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/driver.py", line 21, in _create_driver
+    return active_drivers[0]()
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/driver.py", line 342, in __init__
+    self.utils = CudaUtils()  # TODO: make static
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/driver.py", line 101, in __init__
+    mod = compile_module_from_file(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/build.py", line 196, in compile_module_from_file
+    return _compile_so_from_file(src_path, name, library_dirs, include_dirs, libraries, ccflags, load_module=True)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/build.py", line 165, in _compile_so_from_file
+    return _compile_so(src=src, src_path=src_path, name=name, library_dirs=library_dirs, include_dirs=include_dirs,
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/build.py", line 149, in _compile_so
+    so = _build(name, src_path, tmpdir, library_dirs or [], include_dirs or [], libraries or [], ccflags or [],
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/runtime/build.py", line 83, in _build
+    subprocess.check_call(cc_cmd, stdout=subprocess.DEVNULL)
+  File "/usr/lib/python3.10/subprocess.py", line 369, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['/usr/bin/gcc', '/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/driver.c', '-O3', '-shared', '-fPIC', '-Wno-psabi', '-o', '/tmp/tmph7filjac/cuda_utils.cpython-310-x86_64-linux-gnu.so', '-l:libcuda.so.1', '-L/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/lib', '-L/lib/x86_64-linux-gnu', '-I/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/triton/backends/nvidia/include', '-I/tmp/tmph7filjac', '-I/usr/include/python3.10']' returned non-zero exit status 1.

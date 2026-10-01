@@ -1,0 +1,21 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:13,  4.57s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:09<00:08,  4.50s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:13<00:04,  4.37s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:14<00:00,  3.06s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:14<00:00,  3.57s/it]
+Traceback (most recent call last):
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/zeroshot_two_datasets.py", line 116, in <module>
+    mhs_sample = prepare_mhs()
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/zeroshot_two_datasets.py", line 59, in prepare_mhs
+    raw = pd.read_csv(MHS_CSV)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: 'mhs.csv'

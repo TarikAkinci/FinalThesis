@@ -1,0 +1,164 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:17,  5.78s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:12,  6.02s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:18<00:06,  6.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:20<00:00,  4.52s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:20<00:00,  5.10s/it]
+  20/210
+  40/210
+  60/210
+  80/210
+  100/210
+  120/210
+  140/210
+  WARNING: span not found for item_id=1560 condition=baseline (instr_span=(63, 81), text_span=None, prompt_tokens=87) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=gender_man (instr_span=(68, 86), text_span=None, prompt_tokens=92) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=gender_woman (instr_span=(68, 86), text_span=None, prompt_tokens=92) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=region_western_europe (instr_span=(70, 88), text_span=None, prompt_tokens=94) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=region_arab_culture (instr_span=(72, 90), text_span=None, prompt_tokens=96) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=religion_christian (instr_span=(67, 85), text_span=None, prompt_tokens=91) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  WARNING: span not found for item_id=1560 condition=religion_muslim (instr_span=(67, 85), text_span=None, prompt_tokens=91) -- likely truncated by MAX_LENGTH or an unexpected text encoding; segment/layer percentages for this row will be NaN
+  160/210
+  180/210
+  200/210
+
+Saved attention_probe_segments.csv, attention_probe_token_level.csv, and attention_probe_layerwise.csv
+
+Mean attention by segment, by condition (this is the 'where does attention go' answer):
+                       pct_demographic  ...  pct_other_scaffolding
+condition                               ...                       
+baseline                           NaN  ...               0.798160
+gender_man                    0.012407  ...               0.788308
+gender_woman                  0.013372  ...               0.786912
+region_arab_culture           0.021391  ...               0.781494
+region_western_europe         0.015155  ...               0.785098
+religion_christian            0.012405  ...               0.789149
+religion_muslim               0.015639  ...               0.790077
+
+[7 rows x 4 columns]
+
+Same breakdown, sink-excluded and renormalized over only non-scaffolding attention
+(factors out the attention-sink effect -- fairer cross-condition comparison):
+                       pct_demographic_norm  ...  pct_item_text_norm
+condition                                    ...                    
+baseline                                NaN  ...            0.129741
+gender_man                         0.058813  ...            0.125214
+gender_woman                       0.063011  ...            0.124453
+region_arab_culture                0.098539  ...            0.133674
+region_western_europe              0.070687  ...            0.125209
+religion_christian                 0.059015  ...            0.126306
+religion_muslim                    0.074815  ...            0.131373
+
+[7 rows x 3 columns]
+
+Sink (pct_other_scaffolding) by layer, baseline condition (is the sink uniform across layers?):
+layer
+0     0.585351
+1     0.858822
+2     0.933489
+3     0.899264
+4     0.839549
+5     0.819875
+6     0.809887
+7     0.715731
+8     0.764690
+9     0.704000
+10    0.718763
+11    0.690680
+12    0.641610
+13    0.547812
+14    0.534808
+15    0.693766
+16    0.759118
+17    0.715636
+18    0.775919
+19    0.815776
+20    0.784839
+21    0.875127
+22    0.795399
+23    0.892727
+24    0.908786
+25    0.951236
+26    0.936009
+27    0.914944
+28    0.928886
+29    0.935727
+30    0.866561
+31    0.926341
+Name: pct_other_scaffolding, dtype: float64
+
+Demographic attention by layer, religion_muslim vs religion_christian
+(where does the demographic-attention effect concentrate?):
+condition  religion_christian  religion_muslim
+layer                                         
+0                    0.020778         0.022592
+1                    0.010805         0.010374
+2                    0.020936         0.021475
+3                    0.010491         0.012498
+4                    0.020247         0.017142
+5                    0.035112         0.031404
+6                    0.034593         0.031361
+7                    0.031303         0.031603
+8                    0.041222         0.046111
+9                    0.019539         0.025371
+10                   0.021921         0.036205
+11                   0.016436         0.030095
+12                   0.013194         0.020684
+13                   0.013639         0.036872
+14                   0.008681         0.016653
+15                   0.007797         0.009044
+16                   0.008683         0.017422
+17                   0.007265         0.013453
+18                   0.005283         0.008799
+19                   0.004243         0.005850
+20                   0.005920         0.006659
+21                   0.003338         0.004901
+22                   0.003475         0.004288
+23                   0.002816         0.003102
+24                   0.001658         0.003200
+25                   0.001257         0.001987
+26                   0.002429         0.002949
+27                   0.003475         0.004567
+28                   0.002659         0.003417
+29                   0.004712         0.006040
+30                   0.007564         0.007910
+31                   0.005496         0.006413
+
+--- Top-10 attended tokens, example items, baseline vs. religion_muslim vs. religion_christian ---
+
+item_id=60  text='Rob Ford does not have the attention span to write editorials.'
+  [baseline            ] '<|begin_of_text|>':0.564, '':0.052, '<|end_header_id|>':0.044, ').':0.031, 'assistant':0.027, '1':0.024, '':0.014, '<|eot_id|>':0.014, '?':0.014, '(':0.012
+  [religion_muslim     ] '<|begin_of_text|>':0.545, '':0.053, '<|end_header_id|>':0.043, 'assistant':0.035, ').':0.029, '1':0.021, '<|eot_id|>':0.015, '':0.014, '?':0.014, '(':0.013
+  [religion_christian  ] '<|begin_of_text|>':0.552, '':0.053, '<|end_header_id|>':0.041, 'assistant':0.032, ').':0.030, '1':0.025, '':0.014, '?':0.014, '<|eot_id|>':0.014, '(':0.013
+
+item_id=1560  text=" A lesbian ,  a native,  and a Rabi are in a life boat ... '  Yadda yadda yadda"
+  [baseline            ] '<|begin_of_text|>':0.553, '':0.053, '<|end_header_id|>':0.044, ').':0.031, 'assistant':0.030, '1':0.026, '?':0.014, '':0.014, '<|eot_id|>':0.013, 'yes':0.011
+  [religion_muslim     ] '<|begin_of_text|>':0.541, '':0.054, '<|end_header_id|>':0.045, 'assistant':0.038, ').':0.029, '1':0.025, '<|eot_id|>':0.014, '':0.013, '?':0.013, '':0.010
+  [religion_christian  ] '<|begin_of_text|>':0.543, '':0.054, '<|end_header_id|>':0.043, 'assistant':0.035, ').':0.030, '1':0.027, '?':0.014, '<|eot_id|>':0.013, '':0.013, 'yes':0.011
+
+item_id=2126  text='Wow, taking the 10 seconds to reply is quite the heroic feat.\xa0'
+  [baseline            ] '<|begin_of_text|>':0.562, '':0.052, '<|end_header_id|>':0.043, ').':0.031, 'assistant':0.026, '1':0.024, '':0.014, '?':0.013, '<|eot_id|>':0.013, '(':0.012
+  [religion_muslim     ] '<|begin_of_text|>':0.548, '':0.052, '<|end_header_id|>':0.044, 'assistant':0.035, ').':0.029, '1':0.022, '<|eot_id|>':0.014, '':0.014, '?':0.013, '(':0.012
+  [religion_christian  ] '<|begin_of_text|>':0.553, '':0.052, '<|end_header_id|>':0.043, ').':0.030, 'assistant':0.029, '1':0.025, '':0.013, '?':0.013, '<|eot_id|>':0.013, '(':0.013
+
+item_id=3234  text='The only troll is Amira herself, trolling for Islam and for western civilization'
+  [baseline            ] '<|begin_of_text|>':0.550, '':0.051, '<|end_header_id|>':0.048, 'assistant':0.034, ').':0.029, '1':0.027, '?':0.014, '':0.014, '<|eot_id|>':0.013, 'yes':0.012
+  [religion_muslim     ] '<|begin_of_text|>':0.538, '':0.052, '<|end_header_id|>':0.049, 'assistant':0.040, ').':0.029, '1':0.026, '':0.014, '?':0.013, '<|eot_id|>':0.013, 'yes':0.011
+  [religion_christian  ] '<|begin_of_text|>':0.544, '':0.053, '<|end_header_id|>':0.047, 'assistant':0.037, ').':0.029, '1':0.027, '?':0.014, '':0.013, '<|eot_id|>':0.013, 'yes':0.011
+
+item_id=3972  text='Would you want a citizen of the Republic of France to negotiate a trade deal wit'
+  [baseline            ] '<|begin_of_text|>':0.556, '':0.053, '<|end_header_id|>':0.046, ').':0.030, 'assistant':0.028, '1':0.027, '?':0.016, '':0.014, '<|eot_id|>':0.014, 'yes':0.012
+  [religion_muslim     ] '<|begin_of_text|>':0.544, '':0.052, '<|end_header_id|>':0.045, 'assistant':0.034, ').':0.028, '1':0.025, '':0.015, '<|eot_id|>':0.015, '?':0.015, 'Is':0.011
+  [religion_christian  ] '<|begin_of_text|>':0.547, '':0.053, '<|end_header_id|>':0.044, 'assistant':0.032, ').':0.029, '1':0.026, '?':0.015, '':0.015, '<|eot_id|>':0.014, 'Is':0.011
+
+item_id=4488  text='Oh, I see, Alexvega... so, In other words, guilty until proven innocent, hmm? Yu'
+  [baseline            ] '<|begin_of_text|>':0.561, '':0.052, '<|end_header_id|>':0.043, ').':0.030, 'assistant':0.026, '1':0.026, '?':0.015, '':0.014, '<|eot_id|>':0.013, 'or':0.011
+  [religion_muslim     ] '<|begin_of_text|>':0.552, '':0.052, '<|end_header_id|>':0.043, 'assistant':0.031, ').':0.028, '1':0.025, '<|eot_id|>':0.014, '':0.014, '?':0.013, ')':0.010
+  [religion_christian  ] '<|begin_of_text|>':0.555, '':0.053, '<|end_header_id|>':0.043, ').':0.029, 'assistant':0.028, '1':0.026, '?':0.014, '':0.014, '<|eot_id|>':0.013, '(':0.011
+
+Saved 18 attention heatmaps to attention_heatmaps/
+
+Saved content-only attention bar charts to content_attention_charts/

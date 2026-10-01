@@ -1,0 +1,61 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Selected 100 high-disagreement items from the seeded 500-item eval sample (entropy range 1.833-2.292)
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.24it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.02it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.01it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.93it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.53it/s]
+  100/600
+  200/600
+  300/600
+  400/600
+  500/600
+  600/600
+
+Saved results/disagreement_scaled/disagreement_scaled_items.csv and results/disagreement_scaled/disagreement_scaled_results.csv
+
+Rows with unfound span: 0
+
+=== Flip rate by condition (n=100 items) ===
+                       mean  sum  count
+condition                              
+gender_man             0.04    4    100
+gender_woman           0.12   12    100
+placebo                0.10   10    100
+region_arab_culture    0.17   17    100
+region_western_europe  0.10   10    100
+
+=== Does the SIZE of the item's overall rating entropy predict a bigger model shift? (Spearman) ===
+  (n=100): entropy vs |delta P(yes)|: rho=-0.073 p=0.4685   entropy vs pct_demographic_norm: rho=-0.060 p=0.5503
+
+=== Mean |delta P(yes)| vs baseline, by condition ===
+                           mean       std
+condition                                
+gender_man             0.098380  0.114104
+gender_woman           0.116248  0.136582
+placebo                0.125801  0.119739
+region_arab_culture    0.164943  0.178082
+region_western_europe  0.126494  0.142403
+
+=== Placebo check: paired Wilcoxon, each demographic condition vs placebo, pct_demographic_norm ===
+  gender_man              : mean_demo=0.0592  mean_placebo=0.0777  mean_diff=-0.0185  frac_demo_higher=0.00  n=100  p=3.897e-18
+  gender_woman            : mean_demo=0.0634  mean_placebo=0.0777  mean_diff=-0.0143  frac_demo_higher=0.00  n=100  p=3.897e-18
+  region_western_europe   : mean_demo=0.0709  mean_placebo=0.0777  mean_diff=-0.0068  frac_demo_higher=0.03  n=100  p=1.415e-17
+  region_arab_culture     : mean_demo=0.0969  mean_placebo=0.0777  mean_diff=+0.0192  frac_demo_higher=1.00  n=100  p=3.897e-18
+
+=== Placebo check: paired Wilcoxon, each demographic condition vs placebo, |delta P(yes)| ===
+  gender_man              : mean_abs_delta_demo=0.0984  mean_abs_delta_placebo=0.1258  mean_diff=-0.0274  n=100  p=0.09421
+  gender_woman            : mean_abs_delta_demo=0.1162  mean_abs_delta_placebo=0.1258  mean_diff=-0.0096  n=100  p=0.09934
+  region_western_europe   : mean_abs_delta_demo=0.1265  mean_abs_delta_placebo=0.1258  mean_diff=+0.0007  n=100  p=0.5861
+  region_arab_culture     : mean_abs_delta_demo=0.1649  mean_abs_delta_placebo=0.1258  mean_diff=+0.0391  n=100  p=0.5612
+
+=== Direction check: how many items push toward 'offensive' vs 'not offensive', by condition ===
+                       n_positive  n_negative      mean
+condition                                              
+gender_man                     71          23  0.062857
+gender_woman                   59          35  0.049776
+placebo                        31          67 -0.078214
+region_arab_culture            75          25  0.111255
+region_western_europe          77          20  0.098407
+
+Saved 18 illustrative attention heatmaps to figures/disagreement_scaled/attention_heatmaps_scaled/
+Saved 3 illustrative content-attention charts to figures/disagreement_scaled/content_attention_charts_scaled/

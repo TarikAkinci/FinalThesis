@@ -1,0 +1,118 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+D3CODE positive rate: 0.20
+MHS positive rate: 0.29
+
+=== Loading model: meta-llama/Llama-3.1-8B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:06<00:18,  6.17s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:12<00:12,  6.15s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:18<00:06,  6.11s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.25s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.94s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+tokenization check '0': bare=[15] spaced=[220, 15]
+tokenization check '1': bare=[16] spaced=[220, 16]
+unconstrained generation probe: '0'
+[d3code] format check: 100% bare-digit compliant on 20 real items
+[mhs] format check: 100% bare-digit compliant on 20 real items
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+=== Loading model: Qwen/Qwen2.5-7B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:14,  4.68s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:09<00:09,  4.63s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:13<00:04,  4.61s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.45s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.52s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+tokenization check '0': bare=[15] spaced=[220, 15]
+tokenization check '1': bare=[16] spaced=[220, 16]
+unconstrained generation probe: '0'
+[d3code] format check: 100% bare-digit compliant on 20 real items
+[mhs] format check: 100% bare-digit compliant on 20 real items
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+--- This run ---
+                           model dataset   n  accuracy  precision   recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.374   0.242131 1.000000 0.389864               0.200               0.826
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231 1.000000 0.493103               0.286               0.874
+        Qwen/Qwen2.5-7B-Instruct  d3code 500     0.394   0.248139 1.000000 0.397614               0.200               0.806
+        Qwen/Qwen2.5-7B-Instruct     mhs 500     0.430   0.333333 0.993007 0.499121               0.286               0.852
+
+--- All results so far (all models) ---
+                           model dataset   n  accuracy  precision   recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.374   0.242131 1.000000 0.389864               0.200               0.826
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231 1.000000 0.493103               0.286               0.874
+        Qwen/Qwen2.5-7B-Instruct  d3code 500     0.394   0.248139 1.000000 0.397614               0.200               0.806
+        Qwen/Qwen2.5-7B-Instruct     mhs 500     0.430   0.333333 0.993007 0.499121               0.286               0.852

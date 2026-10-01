@@ -1,0 +1,58 @@
+Downloading meta-llama/Llama-3.1-8B-Instruct...
+Fetching 17 files:   0%|          | 0/17 [00:00<?, ?it/s]Fetching 17 files: 100%|██████████| 17/17 [00:00<00:00, 334.61it/s]
+[32m✓ Downloaded[0m
+  path: /dss/dsshome1/0A/go69neq2/.cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659
+Downloading Qwen/Qwen2.5-7B-Instruct...
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:  79%|███████▊  | 11/14 [00:27<00:07,  2.46s/it]Fetching 14 files:  86%|████████▌ | 12/14 [00:27<00:04,  2.21s/it]Fetching 14 files:  93%|█████████▎| 13/14 [00:27<00:01,  1.97s/it]Fetching 14 files:  93%|█████████▎| 13/14 [00:28<00:02,  2.17s/it]
+Traceback (most recent call last):
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/bin/hf", line 6, in <module>
+    sys.exit(main())
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/cli/hf.py", line 173, in main
+    app()
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/click/core.py", line 1631, in __call__
+    return self.main(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/click/core.py", line 1552, in main
+    rv = self.invoke(ctx)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/cli/_cli_utils.py", line 132, in invoke
+    return super().invoke(ctx)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/click/core.py", line 2032, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/click/core.py", line 1415, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/click/core.py", line 910, in invoke
+    return callback(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/cli/_framework.py", line 365, in handler
+    return func(**call_kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/cli/download.py", line 228, in download
+    _print_result(run_download())
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/cli/download.py", line 187, in run_download
+    return snapshot_download(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/_snapshot_download.py", line 532, in snapshot_download
+    hf_thread_map(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/utils/tqdm.py", line 441, in hf_thread_map
+    results[future_to_index[future]] = future.result()
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 451, in result
+    return self.__get_result()
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/_snapshot_download.py", line 512, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1047, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1285, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 2016, in _download_to_tmp_and_move
+    xet_get(
+  File "/dss/dsshome1/0A/go69neq2/thesis-env/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 589, in xet_get
+    with session.new_file_download_group(
+RuntimeError: Task error: File reconstruction error: IO Error: Disk quota exceeded (os error 122)

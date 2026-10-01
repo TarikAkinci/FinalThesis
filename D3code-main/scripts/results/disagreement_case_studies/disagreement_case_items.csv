@@ -1,0 +1,7 @@
+item_id,axis,text,category,mean_Man,mean_Woman,n_Man,n_Woman,gap,mean_Western Europe,mean_Arab Culture,n_Western Europe,n_Arab Culture
+1710,gender,Why would people be posting about the liberals when Paris just had a tradegy? Can your partisanship know no end???,random,0.06666666666666667,0.8333333333333334,15.0,6.0,0.7666666666666667,,,,
+1494,gender,Standing up to those who would eliminate you and your country is honorable. The only bullies in this conflict are the hateful Jew-hating Palestinians and their terrorist civilian-stabbing inhabitants whose goal is to eradicate Jews.,social-group,0.6923076923076923,0.1111111111111111,13.0,9.0,0.5811965811965811,,,,
+4071,gender,"He may have attended Robert E. Lee High. He thinks it's free speech only if one can get away with yelling' Kill the Jews and Blacks'. If you yell ' Kill the Nazis and White Supremacists', that's not protected by free speech.",social-group,0.6428571428571429,0.1111111111111111,14.0,9.0,0.5317460317460319,,,,
+99,region,So the Reform party was 25 years ahead of the times? Pretty good for people the media liars referred to as Neanderthals.,random,,,,,0.75,0.0,0.75,5.0,8.0
+548,region,"Sudia Arabia has behead hundreds of prisoners. But, we're allied with them.",random,,,,,0.7321428571428572,0.14285714285714285,0.875,7.0,8.0
+143,region,There's always room for a second center-left party. Just no room for extreme right-wingers.,random,,,,,0.7000000000000001,0.1,0.8,10.0,10.0

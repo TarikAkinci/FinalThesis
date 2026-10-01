@@ -1,0 +1,26 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+tertile edges (from train): low<=1.700, high>=2.051
+train: n=2110, positive (high disagreement) rate=50.0%
+test: n=434, positive (high disagreement) rate=46.5%
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:12,  4.27s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.00s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.32s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.18it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.33s/it]
+
+Extracting train activations (n=2110)...
+  200/2110
+  400/2110
+  600/2110
+  800/2110
+  1000/2110
+  1200/2110
+  1400/2110
+  1600/2110
+  1800/2110
+  2000/2110
+Extracting test activations (n=434)...
+  200/434
+  400/434
+
+Saved to activations.npz

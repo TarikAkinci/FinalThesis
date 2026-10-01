@@ -1,0 +1,91 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+D3CODE eval: n=500, positive rate=0.20  |  tune: n=150, positive rate=0.17
+MHS eval: n=500, positive rate=0.29  |  tune: n=150, positive rate=0.33
+
+=== Loading model: meta-llama/Llama-3.1-8B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:16,  5.58s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:11,  5.55s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:17<00:05,  5.97s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.47s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.94s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[d3code/tune] 50/150
+[d3code/tune] 100/150
+[d3code/tune] 150/150
+[d3code] tuned threshold=0.99 (macro F1 on tune set=0.600, n=150)
+[d3code/eval] 50/500
+[d3code/eval] 100/500
+[d3code/eval] 150/500
+[d3code/eval] 200/500
+[d3code/eval] 250/500
+[d3code/eval] 300/500
+[d3code/eval] 350/500
+[d3code/eval] 400/500
+[d3code/eval] 450/500
+[d3code/eval] 500/500
+[mhs/tune] 50/150
+[mhs/tune] 100/150
+[mhs/tune] 150/150
+[mhs] tuned threshold=0.99 (macro F1 on tune set=0.544, n=150)
+[mhs/eval] 50/500
+[mhs/eval] 100/500
+[mhs/eval] 150/500
+[mhs/eval] 200/500
+[mhs/eval] 250/500
+[mhs/eval] 300/500
+[mhs/eval] 350/500
+[mhs/eval] 400/500
+[mhs/eval] 450/500
+[mhs/eval] 500/500
+
+=== Loading model: Qwen/Qwen2.5-7B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:07<00:23,  7.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:14<00:14,  7.16s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:21<00:07,  7.12s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.53s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.80s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[d3code/tune] 50/150
+[d3code/tune] 100/150
+[d3code/tune] 150/150
+[d3code] tuned threshold=0.99 (macro F1 on tune set=0.459, n=150)
+[d3code/eval] 50/500
+[d3code/eval] 100/500
+[d3code/eval] 150/500
+[d3code/eval] 200/500
+[d3code/eval] 250/500
+[d3code/eval] 300/500
+[d3code/eval] 350/500
+[d3code/eval] 400/500
+[d3code/eval] 450/500
+[d3code/eval] 500/500
+[mhs/tune] 50/150
+[mhs/tune] 100/150
+[mhs/tune] 150/150
+[mhs] tuned threshold=0.95 (macro F1 on tune set=0.480, n=150)
+[mhs/eval] 50/500
+[mhs/eval] 100/500
+[mhs/eval] 150/500
+[mhs/eval] 200/500
+[mhs/eval] 250/500
+[mhs/eval] 300/500
+[mhs/eval] 350/500
+[mhs/eval] 400/500
+[mhs/eval] 450/500
+[mhs/eval] 500/500
+
+--- This run ---
+                           model dataset            rule  threshold   n  n_malformed  accuracy  precision   recall       f1  f1_macro  roc_auc  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code greedy_response        NaN 500            0     0.374   0.242131 1.000000 0.389864  0.373577 0.834387               0.200               0.826
+meta-llama/Llama-3.1-8B-Instruct  d3code tuned_threshold       0.99 500            0     0.688   0.377193 0.860000 0.524390  0.646124 0.834387               0.200               0.456
+meta-llama/Llama-3.1-8B-Instruct     mhs greedy_response        NaN 500            0     0.412   0.327231 1.000000 0.493103  0.396552 0.822981               0.286               0.874
+meta-llama/Llama-3.1-8B-Instruct     mhs tuned_threshold       0.99 500            0     0.564   0.393768 0.972028 0.560484  0.563972 0.822981               0.286               0.706
+        Qwen/Qwen2.5-7B-Instruct  d3code greedy_response        NaN 500            0     0.394   0.248139 1.000000 0.397614  0.393978 0.821250               0.200               0.806
+        Qwen/Qwen2.5-7B-Instruct  d3code tuned_threshold       0.99 500            0     0.492   0.281250 0.990000 0.438053  0.487275 0.821250               0.200               0.704
+        Qwen/Qwen2.5-7B-Instruct     mhs greedy_response        NaN 500            0     0.430   0.333333 0.993007 0.499121  0.418934 0.740152               0.286               0.852
+        Qwen/Qwen2.5-7B-Instruct     mhs tuned_threshold       0.95 500            0     0.452   0.342169 0.993007 0.508961  0.444526 0.740152               0.286               0.830
+
+--- All results so far (all models) ---
+                           model dataset            rule  threshold   n  n_malformed  accuracy  precision   recall       f1  f1_macro  positive_rate_true  positive_rate_pred  roc_auc
+meta-llama/Llama-3.1-8B-Instruct  d3code greedy_response        NaN 500            0     0.374   0.242131 1.000000 0.389864  0.373577               0.200               0.826 0.834387
+meta-llama/Llama-3.1-8B-Instruct  d3code tuned_threshold       0.99 500            0     0.688   0.377193 0.860000 0.524390  0.646124               0.200               0.456 0.834387
+meta-llama/Llama-3.1-8B-Instruct     mhs greedy_response        NaN 500            0     0.412   0.327231 1.000000 0.493103  0.396552               0.286               0.874 0.822981
+meta-llama/Llama-3.1-8B-Instruct     mhs tuned_threshold       0.99 500            0     0.564   0.393768 0.972028 0.560484  0.563972               0.286               0.706 0.822981
+        Qwen/Qwen2.5-7B-Instruct  d3code greedy_response        NaN 500            0     0.394   0.248139 1.000000 0.397614  0.393978               0.200               0.806 0.821250
+        Qwen/Qwen2.5-7B-Instruct  d3code tuned_threshold       0.99 500            0     0.492   0.281250 0.990000 0.438053  0.487275               0.200               0.704 0.821250
+        Qwen/Qwen2.5-7B-Instruct     mhs greedy_response        NaN 500            0     0.430   0.333333 0.993007 0.499121  0.418934               0.286               0.852 0.740152
+        Qwen/Qwen2.5-7B-Instruct     mhs tuned_threshold       0.95 500            0     0.452   0.342169 0.993007 0.508961  0.444526               0.286               0.830 0.740152

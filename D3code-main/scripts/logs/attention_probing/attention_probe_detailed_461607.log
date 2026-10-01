@@ -1,0 +1,20 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  1.78it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.79it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.89it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
+  20/210
+  40/210
+  60/210
+  80/210
+  100/210
+  120/210
+  140/210
+Traceback (most recent call last):
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe_detailed.py", line 131, in <module>
+    l_text = float(layer_attn[text_span[0]: text_span[1] + 1].sum())
+TypeError: 'NoneType' object is not subscriptable

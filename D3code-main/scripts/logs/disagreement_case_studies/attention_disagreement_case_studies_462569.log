@@ -1,0 +1,56 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Selected 6 human-disagreement items:
+ item_id   axis      gap     category
+    1710 gender 0.766667       random
+    1494 gender 0.581197 social-group
+    4071 gender 0.531746 social-group
+      99 region 0.750000       random
+     548 region 0.732143       random
+     143 region 0.700000       random
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:16,  5.43s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:11,  5.53s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:16<00:05,  5.60s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  3.92s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.52s/it]
+
+Saved disagreement_case_items.csv and disagreement_case_results.csv
+
+=== Per-item results: human disagreement vs. model behavior ===
+
+item_id=1710  axis=gender  category=random  human_gap=0.77
+  text='Why would people be posting about the liberals when Paris just had a tradegy? Can your partisanship '
+  [baseline                ] predicted=0  pct_demographic_norm=nan
+  [gender_man              ] predicted=1  pct_demographic_norm=0.0579  <-- FLIPPED vs baseline
+  [gender_woman            ] predicted=1  pct_demographic_norm=0.0626  <-- FLIPPED vs baseline
+
+item_id=1494  axis=gender  category=social-group  human_gap=0.58
+  text='Standing up to those who would eliminate you and your country is honorable. The only bullies in this'
+  [baseline                ] predicted=1  pct_demographic_norm=nan
+  [gender_man              ] predicted=1  pct_demographic_norm=0.0576
+  [gender_woman            ] predicted=1  pct_demographic_norm=0.0626
+
+item_id=4071  axis=gender  category=social-group  human_gap=0.53
+  text="He may have attended Robert E. Lee High. He thinks it's free speech only if one can get away with ye"
+  [baseline                ] predicted=1  pct_demographic_norm=nan
+  [gender_man              ] predicted=1  pct_demographic_norm=0.0538
+  [gender_woman            ] predicted=1  pct_demographic_norm=0.0594
+
+item_id=99  axis=region  category=random  human_gap=0.75
+  text='So the Reform party was 25 years ahead of the times? Pretty good for people the media liars referred'
+  [baseline                ] predicted=1  pct_demographic_norm=nan
+  [region_western_europe   ] predicted=1  pct_demographic_norm=0.0665
+  [region_arab_culture     ] predicted=1  pct_demographic_norm=0.0875
+
+item_id=548  axis=region  category=random  human_gap=0.73
+  text="Sudia Arabia has behead hundreds of prisoners. But, we're allied with them."
+  [baseline                ] predicted=1  pct_demographic_norm=nan
+  [region_western_europe   ] predicted=1  pct_demographic_norm=0.0758
+  [region_arab_culture     ] predicted=1  pct_demographic_norm=0.0954
+
+item_id=143  axis=region  category=random  human_gap=0.70
+  text="There's always room for a second center-left party. Just no room for extreme right-wingers."
+  [baseline                ] predicted=1  pct_demographic_norm=nan
+  [region_western_europe   ] predicted=1  pct_demographic_norm=0.0780
+  [region_arab_culture     ] predicted=0  pct_demographic_norm=0.1300  <-- FLIPPED vs baseline
+
+Saved bertviz attention-flow heatmaps to attention_heatmaps_case_studies/
+Saved content-only attention bar charts to content_attention_charts_case_studies/

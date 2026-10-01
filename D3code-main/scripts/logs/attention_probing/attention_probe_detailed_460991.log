@@ -1,0 +1,68 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.15it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.23it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.26it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.80it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.54it/s]
+  20/210
+  40/210
+  60/210
+  80/210
+  100/210
+  120/210
+  140/210
+  160/210
+  180/210
+  200/210
+
+Saved attention_probe_segments.csv and attention_probe_token_level.csv
+
+Mean attention by segment, by condition (this is the 'where does attention go' answer):
+                       pct_demographic  ...  pct_other_scaffolding
+condition                               ...                       
+baseline                           NaN  ...               0.803751
+gender_man                    0.012524  ...               0.794050
+gender_woman                  0.013456  ...               0.793271
+region_arab_culture           0.020478  ...               0.790304
+region_western_europe         0.016060  ...               0.791448
+religion_christian            0.011872  ...               0.794868
+religion_muslim               0.015274  ...               0.796143
+
+[7 rows x 4 columns]
+
+--- Top-10 attended tokens, example items, baseline vs. religion_muslim vs. religion_christian ---
+
+item_id=60  text='Rob Ford does not have the attention span to write editorials.'
+  [baseline            ] '<|begin_of_text|>':0.297, '<|begin_of_text|>':0.296, '':0.041, '<|end_header_id|>':0.034, ').':0.029, '1':0.024, 'assistant':0.024, '<|eot_id|>':0.014, '':0.014, '?':0.013
+  [religion_muslim     ] '<|begin_of_text|>':0.290, '<|begin_of_text|>':0.290, '':0.042, '<|end_header_id|>':0.035, 'assistant':0.029, ').':0.027, '1':0.022, '<|eot_id|>':0.014, '':0.013, '?':0.013
+  [religion_christian  ] '<|begin_of_text|>':0.293, '<|begin_of_text|>':0.293, '':0.042, '<|end_header_id|>':0.033, ').':0.028, 'assistant':0.027, '1':0.024, '<|eot_id|>':0.014, '':0.013, '?':0.013
+
+item_id=1560  text=" A lesbian ,  a native,  and a Rabi are in a life boat ... '  Yadda yadda yadda"
+  [baseline            ] '<|begin_of_text|>':0.289, '<|begin_of_text|>':0.289, '':0.044, '<|end_header_id|>':0.034, ').':0.029, 'assistant':0.027, '1':0.026, '':0.014, '<|eot_id|>':0.014, '?':0.013
+  [religion_muslim     ] '<|begin_of_text|>':0.284, '<|begin_of_text|>':0.284, '':0.044, '<|end_header_id|>':0.036, 'assistant':0.033, ').':0.027, '1':0.023, '<|eot_id|>':0.014, '':0.013, '?':0.012
+  [religion_christian  ] '<|begin_of_text|>':0.285, '<|begin_of_text|>':0.285, '':0.044, '<|end_header_id|>':0.034, 'assistant':0.031, ').':0.028, '1':0.026, '<|eot_id|>':0.014, '':0.013, '?':0.013
+
+item_id=2126  text='Wow, taking the 10 seconds to reply is quite the heroic feat.\xa0'
+  [baseline            ] '<|begin_of_text|>':0.294, '<|begin_of_text|>':0.294, '':0.042, '<|end_header_id|>':0.034, ').':0.028, 'assistant':0.023, '1':0.022, '<|eot_id|>':0.014, '':0.014, '?':0.013
+  [religion_muslim     ] '<|begin_of_text|>':0.290, '<|begin_of_text|>':0.290, '':0.042, '<|end_header_id|>':0.034, 'assistant':0.028, ').':0.026, '1':0.022, '<|eot_id|>':0.014, '':0.013, '?':0.012
+  [religion_christian  ] '<|begin_of_text|>':0.292, '<|begin_of_text|>':0.292, '':0.042, '<|end_header_id|>':0.034, ').':0.027, 'assistant':0.024, '1':0.023, '<|eot_id|>':0.014, '?':0.013, '':0.013
+
+item_id=3234  text='The only troll is Amira herself, trolling for Islam and for western civilization'
+  [baseline            ] '<|begin_of_text|>':0.287, '<|begin_of_text|>':0.287, '':0.043, '<|end_header_id|>':0.039, 'assistant':0.031, ').':0.027, '1':0.024, '':0.014, '<|eot_id|>':0.014, '?':0.013
+  [religion_muslim     ] '<|begin_of_text|>':0.284, '<|begin_of_text|>':0.284, '':0.042, '<|end_header_id|>':0.041, 'assistant':0.036, ').':0.026, '1':0.023, '':0.014, '<|eot_id|>':0.013, '?':0.013
+  [religion_christian  ] '<|begin_of_text|>':0.285, '<|begin_of_text|>':0.285, '':0.042, '<|end_header_id|>':0.039, 'assistant':0.035, ').':0.026, '1':0.024, '<|eot_id|>':0.013, '':0.013, '?':0.013
+
+item_id=3972  text='Would you want a citizen of the Republic of France to negotiate a trade deal wit'
+  [baseline            ] '<|begin_of_text|>':0.292, '<|begin_of_text|>':0.292, '':0.043, '<|end_header_id|>':0.035, ').':0.028, 'assistant':0.024, '1':0.024, '?':0.015, '<|eot_id|>':0.014, '':0.014
+  [religion_muslim     ] '<|begin_of_text|>':0.287, '<|begin_of_text|>':0.287, '':0.042, '<|end_header_id|>':0.035, 'assistant':0.029, ').':0.026, '1':0.022, '':0.014, '<|eot_id|>':0.014, '?':0.014
+  [religion_christian  ] '<|begin_of_text|>':0.289, '<|begin_of_text|>':0.289, '':0.042, '<|end_header_id|>':0.034, 'assistant':0.027, ').':0.027, '1':0.023, '?':0.014, '':0.014, '<|eot_id|>':0.014
+
+item_id=4488  text='Oh, I see, Alexvega... so, In other words, guilty until proven innocent, hmm? Yu'
+  [baseline            ] '<|begin_of_text|>':0.294, '<|begin_of_text|>':0.294, '':0.043, '<|end_header_id|>':0.034, ').':0.028, '1':0.024, 'assistant':0.023, '<|eot_id|>':0.014, '?':0.014, '':0.013
+  [religion_muslim     ] '<|begin_of_text|>':0.291, '<|begin_of_text|>':0.291, '':0.042, '<|end_header_id|>':0.034, 'assistant':0.027, ').':0.027, '1':0.023, '<|eot_id|>':0.013, '?':0.013, '':0.013
+  [religion_christian  ] '<|begin_of_text|>':0.293, '<|begin_of_text|>':0.293, '':0.043, '<|end_header_id|>':0.033, ').':0.027, 'assistant':0.024, '1':0.023, '<|eot_id|>':0.014, '?':0.013, '':0.012
+
+Saved 18 attention heatmaps to attention_heatmaps/

@@ -1,0 +1,220 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.74it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.92it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  3.00it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.63it/s]
+  50/630
+  100/630
+  150/630
+  200/630
+  250/630
+  300/630
+  350/630
+  450/630
+  500/630
+  550/630
+  600/630
+
+Saved results/prompt_variants/prompt_variants_results.csv
+
+Rows with unfound span: 150
+ item_id  variant             condition
+    3972 embedded            gender_man
+    3972 embedded          gender_woman
+    3972 embedded region_western_europe
+    3972 embedded   region_arab_culture
+    3972 embedded               placebo
+    4488 embedded            gender_man
+    4488 embedded          gender_woman
+    4488 embedded region_western_europe
+    4488 embedded   region_arab_culture
+    4488 embedded               placebo
+    1249 embedded            gender_man
+    1249 embedded          gender_woman
+    1249 embedded region_western_europe
+    1249 embedded   region_arab_culture
+    1249 embedded               placebo
+    3491 embedded            gender_man
+    3491 embedded          gender_woman
+    3491 embedded region_western_europe
+    3491 embedded   region_arab_culture
+    3491 embedded               placebo
+    1572 embedded            gender_man
+    1572 embedded          gender_woman
+    1572 embedded region_western_europe
+    1572 embedded   region_arab_culture
+    1572 embedded               placebo
+    4506 embedded            gender_man
+    4506 embedded          gender_woman
+    4506 embedded region_western_europe
+    4506 embedded   region_arab_culture
+    4506 embedded               placebo
+    2127 embedded            gender_man
+    2127 embedded          gender_woman
+    2127 embedded region_western_europe
+    2127 embedded   region_arab_culture
+    2127 embedded               placebo
+    1968 embedded            gender_man
+    1968 embedded          gender_woman
+    1968 embedded region_western_europe
+    1968 embedded   region_arab_culture
+    1968 embedded               placebo
+    4556 embedded            gender_man
+    4556 embedded          gender_woman
+    4556 embedded region_western_europe
+    4556 embedded   region_arab_culture
+    4556 embedded               placebo
+    2884 embedded            gender_man
+    2884 embedded          gender_woman
+    2884 embedded region_western_europe
+    2884 embedded   region_arab_culture
+    2884 embedded               placebo
+    2126 embedded            gender_man
+    2126 embedded          gender_woman
+    2126 embedded region_western_europe
+    2126 embedded   region_arab_culture
+    2126 embedded               placebo
+      60 embedded            gender_man
+      60 embedded          gender_woman
+      60 embedded region_western_europe
+      60 embedded   region_arab_culture
+      60 embedded               placebo
+     580 embedded            gender_man
+     580 embedded          gender_woman
+     580 embedded region_western_europe
+     580 embedded   region_arab_culture
+     580 embedded               placebo
+    2633 embedded            gender_man
+    2633 embedded          gender_woman
+    2633 embedded region_western_europe
+    2633 embedded   region_arab_culture
+    2633 embedded               placebo
+     817 embedded            gender_man
+     817 embedded          gender_woman
+     817 embedded region_western_europe
+     817 embedded   region_arab_culture
+     817 embedded               placebo
+    2003 embedded            gender_man
+    2003 embedded          gender_woman
+    2003 embedded region_western_europe
+    2003 embedded   region_arab_culture
+    2003 embedded               placebo
+    2422 embedded            gender_man
+    2422 embedded          gender_woman
+    2422 embedded region_western_europe
+    2422 embedded   region_arab_culture
+    2422 embedded               placebo
+    1526 embedded            gender_man
+    1526 embedded          gender_woman
+    1526 embedded region_western_europe
+    1526 embedded   region_arab_culture
+    1526 embedded               placebo
+      80 embedded            gender_man
+      80 embedded          gender_woman
+      80 embedded region_western_europe
+      80 embedded   region_arab_culture
+      80 embedded               placebo
+     240 embedded            gender_man
+     240 embedded          gender_woman
+     240 embedded region_western_europe
+     240 embedded   region_arab_culture
+     240 embedded               placebo
+    3234 embedded            gender_man
+    3234 embedded          gender_woman
+    3234 embedded region_western_europe
+    3234 embedded   region_arab_culture
+    3234 embedded               placebo
+    1560 embedded            gender_man
+    1560 embedded          gender_woman
+    1560 embedded region_western_europe
+    1560 embedded   region_arab_culture
+    1560 embedded               placebo
+    3909 embedded            gender_man
+    3909 embedded          gender_woman
+    3909 embedded region_western_europe
+    3909 embedded   region_arab_culture
+    3909 embedded               placebo
+    3969 embedded            gender_man
+    3969 embedded          gender_woman
+    3969 embedded region_western_europe
+    3969 embedded   region_arab_culture
+    3969 embedded               placebo
+    1697 embedded            gender_man
+    1697 embedded          gender_woman
+    1697 embedded region_western_europe
+    1697 embedded   region_arab_culture
+    1697 embedded               placebo
+    4315 embedded            gender_man
+    4315 embedded          gender_woman
+    4315 embedded region_western_europe
+    4315 embedded   region_arab_culture
+    4315 embedded               placebo
+    1316 embedded            gender_man
+    1316 embedded          gender_woman
+    1316 embedded region_western_europe
+    1316 embedded   region_arab_culture
+    1316 embedded               placebo
+    1699 embedded            gender_man
+    1699 embedded          gender_woman
+    1699 embedded region_western_europe
+    1699 embedded   region_arab_culture
+    1699 embedded               placebo
+    3527 embedded            gender_man
+    3527 embedded          gender_woman
+    3527 embedded region_western_europe
+    3527 embedded   region_arab_culture
+    3527 embedded               placebo
+    2256 embedded            gender_man
+    2256 embedded          gender_woman
+    2256 embedded region_western_europe
+    2256 embedded   region_arab_culture
+    2256 embedded               placebo
+
+=== Mean pct_demographic_norm by variant x condition ===
+condition  gender_man  gender_woman  ...  region_arab_culture  region_western_europe
+variant                              ...                                            
+embedded          NaN           NaN  ...                  NaN                    NaN
+prefix       0.058726      0.062864  ...             0.098220               0.070647
+reworded     0.074798      0.078215  ...             0.113993               0.082705
+suffix       0.145469      0.158016  ...             0.190174               0.153618
+
+[4 rows x 5 columns]
+
+=== Demographic vs placebo, per variant (paired Wilcoxon, pct_demographic_norm) ===
+  prefix     gender_man              : mean_diff=-0.0196  frac_higher=0.00  n=30  p=1.863e-09
+  prefix     gender_woman            : mean_diff=-0.0154  frac_higher=0.00  n=30  p=1.863e-09
+  prefix     region_western_europe   : mean_diff=-0.0076  frac_higher=0.00  n=30  p=1.863e-09
+  prefix     region_arab_culture     : mean_diff=+0.0199  frac_higher=1.00  n=30  p=1.863e-09
+  suffix     gender_man              : mean_diff=-0.0172  frac_higher=0.00  n=30  p=1.863e-09
+  suffix     gender_woman            : mean_diff=-0.0047  frac_higher=0.40  n=30  p=0.04726
+  suffix     region_western_europe   : mean_diff=-0.0091  frac_higher=0.20  n=30  p=1.684e-06
+  suffix     region_arab_culture     : mean_diff=+0.0275  frac_higher=1.00  n=30  p=1.863e-09
+  reworded   gender_man              : mean_diff=+0.0002  frac_higher=0.60  n=30  p=0.6554
+  reworded   gender_woman            : mean_diff=+0.0037  frac_higher=0.80  n=30  p=3.904e-05
+  reworded   region_western_europe   : mean_diff=+0.0081  frac_higher=1.00  n=30  p=1.863e-09
+  reworded   region_arab_culture     : mean_diff=+0.0394  frac_higher=1.00  n=30  p=1.863e-09
+  embedded   gender_man              : insufficient/degenerate data (n=0)
+  embedded   gender_woman            : insufficient/degenerate data (n=0)
+  embedded   region_western_europe   : insufficient/degenerate data (n=0)
+  embedded   region_arab_culture     : insufficient/degenerate data (n=0)
+
+=== Demographic vs placebo, per variant (paired Wilcoxon, |delta_prob_yes|) ===
+  prefix     gender_man              : mean_diff=-0.0312  frac_higher=0.23  n=30  p=0.04787
+  prefix     gender_woman            : mean_diff=-0.0282  frac_higher=0.27  n=30  p=0.06666
+  prefix     region_western_europe   : mean_diff=+0.0105  frac_higher=0.40  n=30  p=0.9225
+  prefix     region_arab_culture     : mean_diff=+0.0319  frac_higher=0.43  n=30  p=0.4688
+  suffix     gender_man              : mean_diff=-0.0959  frac_higher=0.07  n=30  p=6.147e-08
+  suffix     gender_woman            : mean_diff=-0.0873  frac_higher=0.13  n=30  p=1.769e-05
+  suffix     region_western_europe   : mean_diff=-0.1627  frac_higher=0.20  n=30  p=5.027e-05
+  suffix     region_arab_culture     : mean_diff=-0.0815  frac_higher=0.40  n=30  p=0.02384
+  reworded   gender_man              : mean_diff=-0.0185  frac_higher=0.30  n=30  p=0.1772
+  reworded   gender_woman            : mean_diff=-0.0138  frac_higher=0.33  n=30  p=0.1642
+  reworded   region_western_europe   : mean_diff=+0.0248  frac_higher=0.43  n=30  p=0.8712
+  reworded   region_arab_culture     : mean_diff=+0.0422  frac_higher=0.53  n=30  p=0.271
+  embedded   gender_man              : mean_diff=-0.2761  frac_higher=0.17  n=30  p=1.218e-05
+  embedded   gender_woman            : mean_diff=-0.2819  frac_higher=0.20  n=30  p=7.057e-05
+  embedded   region_western_europe   : mean_diff=-0.2929  frac_higher=0.27  n=30  p=0.0007979
+  embedded   region_arab_culture     : mean_diff=-0.2470  frac_higher=0.23  n=30  p=0.0006084

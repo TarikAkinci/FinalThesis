@@ -1,0 +1,18 @@
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+The following generation flags are not valid and may be ignored: ['output_attentions']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading tokenizer + Inseq model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.25it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.39it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.50it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  2.17it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.81it/s]
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+patching inseq eos_token_id (was [128001, 128008, 128009], a known inseq==0.6.0 bug on multi-eos models)
+patching inseq tokenizer unk_token_id (was None, no UNK token in this tokenizer) -> 128000
+Traceback (most recent call last):
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py", line 136, in <module>
+    out = inseq_model.attribute(input_texts=prompt, generation_args={"max_new_tokens": 1}, show_progress=False)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/inseq/models/attribution_model.py", line 433, in attribute
+    assert all(
+AssertionError: Forced generations with decoder-only models must start with the input texts.

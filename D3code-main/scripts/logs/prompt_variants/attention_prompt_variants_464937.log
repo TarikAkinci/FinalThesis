@@ -1,0 +1,96 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+Selected 100 high-disagreement items (entropy range 2.108-2.305): {'social-group': 74, 'random': 24, 'moral': 2}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.69it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.85it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.93it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.55it/s]
+  50/2100
+  100/2100
+  150/2100
+  200/2100
+  250/2100
+  300/2100
+  350/2100
+  450/2100
+  500/2100
+  550/2100
+  600/2100
+  650/2100
+  700/2100
+  750/2100
+  800/2100
+  850/2100
+  900/2100
+  950/2100
+  1000/2100
+  1050/2100
+  1100/2100
+  1150/2100
+  1200/2100
+  1250/2100
+  1300/2100
+  1350/2100
+  1400/2100
+  1500/2100
+  1550/2100
+  1600/2100
+  1650/2100
+  1700/2100
+  1750/2100
+  1800/2100
+  1850/2100
+  1900/2100
+  1950/2100
+  2000/2100
+  2050/2100
+  2100/2100
+
+Saved results/prompt_variants/prompt_variants_results.csv
+
+Rows with unfound span: 0
+
+=== Mean pct_demographic_norm by variant x condition ===
+condition  gender_man  gender_woman  ...  region_arab_culture  region_western_europe
+variant                              ...                                            
+embedded     0.024811      0.028245  ...             0.051744               0.039118
+prefix       0.056641      0.061004  ...             0.091852               0.067826
+reworded     0.072007      0.075693  ...             0.106238               0.079152
+suffix       0.140931      0.156125  ...             0.187312               0.152671
+
+[4 rows x 5 columns]
+
+=== Demographic vs placebo, per variant (paired Wilcoxon, pct_demographic_norm) ===
+  prefix     gender_man              : mean_diff=-0.0167  frac_higher=0.00  n=100  p=3.897e-18
+  prefix     gender_woman            : mean_diff=-0.0123  frac_higher=0.00  n=100  p=3.897e-18
+  prefix     region_western_europe   : mean_diff=-0.0055  frac_higher=0.04  n=100  p=4.342e-17
+  prefix     region_arab_culture     : mean_diff=+0.0185  frac_higher=0.99  n=100  p=4.016e-18
+  suffix     gender_man              : mean_diff=-0.0168  frac_higher=0.00  n=100  p=3.897e-18
+  suffix     gender_woman            : mean_diff=-0.0016  frac_higher=0.44  n=100  p=0.1161
+  suffix     region_western_europe   : mean_diff=-0.0051  frac_higher=0.23  n=100  p=3.631e-09
+  suffix     region_arab_culture     : mean_diff=+0.0296  frac_higher=1.00  n=100  p=3.897e-18
+  reworded   gender_man              : mean_diff=-0.0116  frac_higher=0.01  n=100  p=4.016e-18
+  reworded   gender_woman            : mean_diff=-0.0079  frac_higher=0.02  n=100  p=6.504e-18
+  reworded   region_western_europe   : mean_diff=-0.0045  frac_higher=0.10  n=100  p=1.234e-15
+  reworded   region_arab_culture     : mean_diff=+0.0226  frac_higher=1.00  n=100  p=3.897e-18
+  embedded   gender_man              : mean_diff=-0.0181  frac_higher=0.00  n=100  p=3.897e-18
+  embedded   gender_woman            : mean_diff=-0.0146  frac_higher=0.00  n=100  p=3.897e-18
+  embedded   region_western_europe   : mean_diff=-0.0037  frac_higher=0.11  n=100  p=7.398e-15
+  embedded   region_arab_culture     : mean_diff=+0.0089  frac_higher=1.00  n=100  p=3.897e-18
+
+=== Demographic vs placebo, per variant (paired Wilcoxon, |delta_prob_yes|) ===
+  prefix     gender_man              : mean_diff=-0.0309  frac_higher=0.08  n=100  p=7.285e-13
+  prefix     gender_woman            : mean_diff=-0.0286  frac_higher=0.09  n=100  p=3.234e-13
+  prefix     region_western_europe   : mean_diff=-0.0236  frac_higher=0.12  n=100  p=2.507e-10
+  prefix     region_arab_culture     : mean_diff=-0.0144  frac_higher=0.26  n=100  p=1.361e-06
+  suffix     gender_man              : mean_diff=-0.0366  frac_higher=0.18  n=100  p=1.199e-08
+  suffix     gender_woman            : mean_diff=-0.0206  frac_higher=0.34  n=100  p=0.02764
+  suffix     region_western_europe   : mean_diff=-0.0379  frac_higher=0.49  n=100  p=0.3141
+  suffix     region_arab_culture     : mean_diff=+0.0230  frac_higher=0.76  n=100  p=0.0001891
+  reworded   gender_man              : mean_diff=-0.0420  frac_higher=0.05  n=100  p=1.415e-14
+  reworded   gender_woman            : mean_diff=-0.0384  frac_higher=0.05  n=100  p=2.822e-15
+  reworded   region_western_europe   : mean_diff=-0.0348  frac_higher=0.08  n=100  p=1.06e-12
+  reworded   region_arab_culture     : mean_diff=-0.0249  frac_higher=0.19  n=100  p=1.492e-09
+  embedded   gender_man              : mean_diff=-0.1897  frac_higher=0.04  n=100  p=3.092e-17
+  embedded   gender_woman            : mean_diff=-0.1773  frac_higher=0.07  n=100  p=2.43e-16
+  embedded   region_western_europe   : mean_diff=-0.2155  frac_higher=0.04  n=100  p=2.362e-17
+  embedded   region_arab_culture     : mean_diff=-0.1697  frac_higher=0.08  n=100  p=9.332e-15

@@ -1,0 +1,42 @@
+=== Llama ===
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+500 items in the seeded 500-item D3CODE eval sample (entropy -0.000-2.305)
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+
+=== Exact token-matched pairs (this model's tokenizer) ===
+  religion_muslim             4 tok  <->   4 tok  "You are tall."
+  gender_woman                5 tok  <->   5 tok  "You are punctual."
+  region_western_europe       7 tok  <->   7 tok  "You are an early riser."
+  region_arab_culture         9 tok  <->   9 tok  "You are someone who prefers tea over coffee."
+
+=== Run plan: 63 unique (variant, condition) pairs ===
+  breadth    17 pairs
+  structure  15 pairs
+  matched    32 pairs
+  context    12 pairs
+Preflight OK: all spans located for all 63 (variant, condition) pairs on 3 sample items.
+
+PREFLIGHT_ONLY=1: imports, data, token matching and span-finding all OK. Exiting before model load.
+
+=== Qwen ===
+500 items in the seeded 500-item D3CODE eval sample (entropy -0.000-2.305)
+
+Loading model: Qwen/Qwen2.5-7B-Instruct
+
+=== Exact token-matched pairs (this model's tokenizer) ===
+  religion_muslim             4 tok  <->   4 tok  "You are tall."
+  gender_woman                5 tok  <->   5 tok  "You are punctual."
+  region_western_europe       7 tok  <->   7 tok  "You are an early riser."
+  region_arab_culture         9 tok  <->   9 tok  "You are someone who prefers tea over coffee."
+
+=== Run plan: 63 unique (variant, condition) pairs ===
+  breadth    17 pairs
+  structure  15 pairs
+  matched    32 pairs
+  context    12 pairs
+Preflight OK: all spans located for all 63 (variant, condition) pairs on 3 sample items.
+
+PREFLIGHT_ONLY=1: imports, data, token matching and span-finding all OK. Exiting before model load.
+
+ALL PREFLIGHTS PASSED

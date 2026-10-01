@@ -1,0 +1,85 @@
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+500 items in the seeded 500-item D3CODE eval sample (entropy -0.000-2.305)
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+
+=== Exact token-matched pairs (this model's tokenizer) ===
+  religion_muslim             4 tok  <->   4 tok  "You are tall."
+  gender_woman                5 tok  <->   5 tok  "You are punctual."
+  region_western_europe       7 tok  <->   7 tok  "You are an early riser."
+  region_arab_culture         9 tok  <->   9 tok  "You are someone who prefers tea over coffee."
+
+=== Run plan: 63 unique (variant, condition) pairs ===
+  breadth    17 pairs
+  structure  15 pairs
+  matched    32 pairs
+  context    12 pairs
+Preflight OK: all spans located for all 63 (variant, condition) pairs on 3 sample items.
+Loading weights, then moving to cuda
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:  16%|█▌        | 47/291 [00:00<00:00, 356.49it/s]Loading weights:  29%|██▊       | 83/291 [00:00<00:01, 106.75it/s]Loading weights:  35%|███▌      | 102/291 [00:00<00:02, 94.24it/s]Loading weights:  40%|███▉      | 116/291 [00:01<00:01, 92.57it/s]Loading weights:  44%|████▍     | 128/291 [00:01<00:01, 90.64it/s]Loading weights:  48%|████▊     | 139/291 [00:01<00:01, 93.56it/s]Loading weights:  52%|█████▏    | 150/291 [00:01<00:01, 71.41it/s]Loading weights:  55%|█████▍    | 160/291 [00:01<00:01, 74.83it/s]Loading weights:  59%|█████▉    | 171/291 [00:01<00:01, 76.56it/s]Loading weights:  62%|██████▏   | 180/291 [00:02<00:01, 70.26it/s]Loading weights:  65%|██████▍   | 188/291 [00:02<00:01, 54.68it/s]Loading weights:  70%|██████▉   | 203/291 [00:02<00:01, 65.73it/s]Loading weights:  73%|███████▎  | 212/291 [00:02<00:01, 61.35it/s]Loading weights:  79%|███████▉  | 230/291 [00:02<00:01, 57.21it/s]Loading weights:  85%|████████▌ | 248/291 [00:03<00:00, 69.56it/s]Loading weights:  88%|████████▊ | 257/291 [00:03<00:00, 71.24it/s]Loading weights:  92%|█████████▏| 267/291 [00:03<00:00, 66.55it/s]Loading weights:  96%|█████████▌| 278/291 [00:03<00:00, 71.97it/s]Loading weights:  98%|█████████▊| 286/291 [00:03<00:00, 63.22it/s]Loading weights: 100%|██████████| 291/291 [00:03<00:00, 78.24it/s]
+
+=== Stage 1: baseline pass over all 500 items ===
+  100/500
+  200/500
+  300/500
+  400/500
+  500/500
+
+3 of 500 items have baseline P(yes) in [0.02, 0.98] -- these carry the condition grid.
+  entropy in selected set: 2.267-2.292 (NOT filtered on, recorded as a covariate)
+  categories: {'social-group': 2, 'random': 1}
+
+=== Stage 2: 63 pairs x 3 items = 189 forward passes ===
+
+Saved results/master_grid_smoke/master_grid_Llama-3-1-8B-Instruct.csv  (689 rows)
+Saved results/master_grid_smoke/master_grid_layerwise_Llama-3-1-8B-Instruct.csv.gz  (22048 rows)
+Saved results/master_grid_smoke/master_grid_perhead_Llama-3-1-8B-Instruct.npz  shape=(689, 32, 32, 4) (rows, layers, heads, segments), float16
+
+Rows with unfound span: 0 (preflight should have made this 0)
+
+=== Mean signed delta P(yes), prefix structure, all conditions ===
+                                          mean  count
+axis     condition                                   
+region   region_latin_america           0.0345      3
+identity identity_arab                  0.0328      3
+region   region_sub_saharan_africa      0.0325      3
+         region_arab_culture            0.0317      3
+         region_western_europe          0.0296      3
+identity identity_european              0.0244      3
+religion religion_christian             0.0242      3
+region   region_indian_cultural_sphere  0.0237      3
+religion religion_muslim                0.0206      3
+gender   gender_man                     0.0189      3
+region   region_oceania                 0.0151      3
+         region_north_america           0.0135      3
+         region_sinosphere              0.0098      3
+gender   gender_woman                   0.0053      3
+placebo  placebo_tok4                   0.0021      3
+         placebo_tok7                  -0.0091      3
+         placebo_mid                   -0.0096      3
+         placebo_short                 -0.0336      3
+         placebo_tok5                  -0.0406      3
+         placebo_long                  -0.0536      3
+         placebo_tok9                  -0.0536      3
+
+=== Mean signed delta P(yes) by variant x condition ===
+condition     gender_man  gender_woman  identity_arab  identity_european  placebo_long  placebo_mid  placebo_short  placebo_tok4  placebo_tok5  placebo_tok7  placebo_tok9  region_arab_culture  region_indian_cultural_sphere  region_latin_america  region_north_america  region_oceania  region_sinosphere  region_sub_saharan_africa  region_western_europe  religion_christian  religion_muslim
+variant                                                                                                                                                                                                                                                                                                                                                                                             
+context              NaN         0.032            NaN                NaN        -0.187       -0.161            NaN           NaN           NaN           NaN           NaN                0.026                            NaN                   NaN                   NaN             NaN             -0.002                        NaN                  0.026                 NaN              NaN
+context_long         NaN         0.033            NaN                NaN        -0.462       -0.431            NaN           NaN           NaN           NaN           NaN                0.031                            NaN                   NaN                   NaN             NaN             -0.000                        NaN                  0.027                 NaN              NaN
+embedded          -0.089        -0.022            NaN                NaN        -0.444          NaN            NaN        -0.123        -0.006        -0.057        -0.444               -0.006                            NaN                   NaN                   NaN             NaN                NaN                        NaN                 -0.025                 NaN           -0.396
+prefix             0.019         0.005          0.033              0.024        -0.054       -0.010         -0.034         0.002        -0.041        -0.009        -0.054                0.032                          0.024                 0.034                 0.014           0.015              0.010                      0.033                  0.030               0.024            0.021
+reworded           0.015         0.002            NaN                NaN        -0.086          NaN            NaN        -0.015        -0.094        -0.032        -0.086                0.026                            NaN                   NaN                   NaN             NaN                NaN                        NaN                  0.022                 NaN            0.002
+suffix            -0.084        -0.119            NaN                NaN        -0.252          NaN            NaN        -0.100        -0.044        -0.142        -0.252               -0.148                            NaN                   NaN                   NaN             NaN                NaN                        NaN                 -0.120                 NaN           -0.347
+
+=== Mean sink-excluded demographic attention by variant x condition ===
+condition     gender_man  gender_woman  identity_arab  identity_european  placebo_long  placebo_mid  placebo_short  placebo_tok4  placebo_tok5  placebo_tok7  placebo_tok9  region_arab_culture  region_indian_cultural_sphere  region_latin_america  region_north_america  region_oceania  region_sinosphere  region_sub_saharan_africa  region_western_europe  religion_christian  religion_muslim
+variant                                                                                                                                                                                                                                                                                                                                                                                             
+context              NaN        0.1410            NaN                NaN        0.1359       0.1164            NaN           NaN           NaN           NaN           NaN               0.1758                            NaN                   NaN                   NaN             NaN             0.1719                        NaN                 0.1522                 NaN              NaN
+context_long         NaN        0.2187            NaN                NaN        0.2235       0.2088            NaN           NaN           NaN           NaN           NaN               0.2474                            NaN                   NaN                   NaN             NaN             0.2452                        NaN                 0.2270                 NaN              NaN
+embedded          0.0264        0.0274            NaN                NaN        0.0436          NaN            NaN        0.0275        0.0371        0.0360        0.0436               0.0557                            NaN                   NaN                   NaN             NaN                NaN                        NaN                 0.0418                 NaN           0.0336
+prefix            0.0606        0.0638         0.0646             0.0591        0.0751       0.0555         0.0647        0.0490        0.0583        0.0573        0.0751               0.0967                         0.0919                0.0854                0.0682          0.0721             0.0815                     0.0853                 0.0721              0.0612           0.0777
+reworded          0.0766        0.0792            NaN                NaN        0.0864          NaN            NaN        0.0666        0.0735        0.0705        0.0864               0.1119                            NaN                   NaN                   NaN             NaN                NaN                        NaN                 0.0849                 NaN           0.0977
+suffix            0.1444        0.1479            NaN                NaN        0.1587          NaN            NaN        0.1366        0.1461        0.1443        0.1587               0.1952                            NaN                   NaN                   NaN             NaN                NaN                        NaN                 0.1575                 NaN           0.1478

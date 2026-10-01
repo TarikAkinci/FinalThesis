@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/master_grid.py", line 57, in <module>
+    from zeroshot_two_datasets import PROMPT
+  File "/dss/dsshome1/0A/go69neq2/FinalThesis/D3code-main/scripts/zeroshot_two_datasets.py", line 24, in <module>
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+ModuleNotFoundError: No module named 'sklearn'

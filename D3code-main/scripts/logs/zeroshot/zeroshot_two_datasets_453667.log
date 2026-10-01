@@ -1,0 +1,14 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Traceback (most recent call last):
+  File "/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/zeroshot_two_datasets.py", line 104, in <module>
+    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, torch_dtype=torch.bfloat16, device_map="auto")
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/transformers/models/auto/auto_factory.py", line 604, in from_pretrained
+    return model_class.from_pretrained(
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/transformers/modeling_utils.py", line 277, in _wrapper
+    return func(*args, **kwargs)
+  File "/storage/home/tarik.akinci/thesis-env/lib64/python3.9/site-packages/transformers/modeling_utils.py", line 4806, in from_pretrained
+    raise ValueError(
+ValueError: Using a `device_map`, `tp_plan`, `torch.device` context manager or setting `torch.set_default_device(device)` requires `accelerate`. You can install it with `pip install accelerate`

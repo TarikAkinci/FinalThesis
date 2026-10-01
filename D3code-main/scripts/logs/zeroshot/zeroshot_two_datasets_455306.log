@@ -1,0 +1,67 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+D3CODE positive rate: 0.20
+MHS positive rate: 0.29
+
+=== Loading model: meta-llama/Llama-3.1-8B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.05it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.96it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.00it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.88it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.48it/s]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+=== Loading model: Qwen/Qwen2.5-7B-Instruct ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.68it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.63it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.59it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.57it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.59it/s]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+--- This run ---
+                           model dataset   n  n_malformed  accuracy  precision   recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500            0     0.374   0.242131 1.000000 0.389864               0.200               0.826
+meta-llama/Llama-3.1-8B-Instruct     mhs 500            0     0.412   0.327231 1.000000 0.493103               0.286               0.874
+        Qwen/Qwen2.5-7B-Instruct  d3code 500            0     0.394   0.248139 1.000000 0.397614               0.200               0.806
+        Qwen/Qwen2.5-7B-Instruct     mhs 500            0     0.430   0.333333 0.993007 0.499121               0.286               0.852
+
+--- All results so far (all models) ---
+                           model dataset   n  n_malformed  accuracy  precision   recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500            0     0.374   0.242131 1.000000 0.389864               0.200               0.826
+meta-llama/Llama-3.1-8B-Instruct     mhs 500            0     0.412   0.327231 1.000000 0.493103               0.286               0.874
+        Qwen/Qwen2.5-7B-Instruct  d3code 500            0     0.394   0.248139 1.000000 0.397614               0.200               0.806
+        Qwen/Qwen2.5-7B-Instruct     mhs 500            0     0.430   0.333333 0.993007 0.499121               0.286               0.852

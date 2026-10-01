@@ -1,0 +1,37 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:03,  1.32s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.23s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:03<00:01,  1.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.30it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.08it/s]
+D3CODE positive rate: 0.11
+MHS positive rate: 0.29
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+--- This run ---
+                           model dataset   n  accuracy  precision  recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.284   0.137349     1.0 0.241525               0.114               0.830
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231     1.0 0.493103               0.286               0.874
+
+--- All results so far (all models) ---
+                           model dataset   n  accuracy  precision  recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.284   0.137349     1.0 0.241525               0.114               0.830
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231     1.0 0.493103               0.286               0.874

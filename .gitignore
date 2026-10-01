@@ -1,0 +1,11 @@
+D3code-main/scripts/archive/activations.npz
+.item143_baseline.html.uMXxwd
+.venv
+__pycache__.venv/
+__pycache__/
+.DS_Store
+*.html
+*.npz
+D3code-main/dataset/mhs.csv
+.*.uMXxwd
+_cloud_bundle.tgz

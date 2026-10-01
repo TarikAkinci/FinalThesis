@@ -1,0 +1,42 @@
+slurmstepd: error: Unable to create TMPDIR [/scratch/tarik.akinci/tmp]: No such file or directory
+slurmstepd: error: Setting TMPDIR to /tmp
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:16,  5.40s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:11,  5.56s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:16<00:05,  5.59s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  3.92s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.51s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+tokenization check '0': bare=[15] spaced=[220, 15]
+tokenization check '1': bare=[16] spaced=[220, 16]
+unconstrained generation probe: '0'
+D3CODE positive rate: 0.20
+MHS positive rate: 0.29
+[d3code] 50/500
+[d3code] 100/500
+[d3code] 150/500
+[d3code] 200/500
+[d3code] 250/500
+[d3code] 300/500
+[d3code] 350/500
+[d3code] 400/500
+[d3code] 450/500
+[d3code] 500/500
+[mhs] 50/500
+[mhs] 100/500
+[mhs] 150/500
+[mhs] 200/500
+[mhs] 250/500
+[mhs] 300/500
+[mhs] 350/500
+[mhs] 400/500
+[mhs] 450/500
+[mhs] 500/500
+
+--- This run ---
+                           model dataset   n  accuracy  precision  recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.372   0.243373     1.0 0.391473               0.202               0.830
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231     1.0 0.493103               0.286               0.874
+
+--- All results so far (all models) ---
+                           model dataset   n  accuracy  precision  recall       f1  positive_rate_true  positive_rate_pred
+meta-llama/Llama-3.1-8B-Instruct  d3code 500     0.372   0.243373     1.0 0.391473               0.202               0.830
+meta-llama/Llama-3.1-8B-Instruct     mhs 500     0.412   0.327231     1.0 0.493103               0.286               0.874

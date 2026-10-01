@@ -1,0 +1,40 @@
+/storage/home/tarik.akinci/FinalThesis/D3code-main/scripts/attention_probe.py:55: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  sampled = df.groupby("category", group_keys=False).apply(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Sampled 30 items across categories: {'moral': 10, 'random': 10, 'social-group': 10}
+
+Loading model: meta-llama/Llama-3.1-8B-Instruct
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.06it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.14it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.18it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.71it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.44it/s]
+  20/210
+  40/210
+  60/210
+  80/210
+  100/210
+  120/210
+  140/210
+  160/210
+  180/210
+  200/210
+
+Saved attention_probe_results.csv
+
+Mean %% attention on item text, by condition:
+condition
+region_arab_culture      0.029513
+religion_muslim          0.029140
+region_western_europe    0.028886
+gender_man               0.028833
+religion_christian       0.028809
+gender_woman             0.028575
+baseline                 0.028272
+Name: pct_attention_on_item_text, dtype: float64
+
+Mean %% attention on demographic phrase, by condition (baseline excluded):
+condition
+gender_man               0.012524
+gender_woman             0.013456
+region_arab_culture      0.020478
+region_western_europe    0.016060
+religion_christian       0.011872
+religion_muslim          0.015274
+Name: pct_attention_on_demographic, dtype: float64
