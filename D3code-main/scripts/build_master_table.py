@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon, spearmanr
 
-RESULTS_DIR = "results/master_grid"
-OUT_CSV = "results/master_table.csv"
-OUT_MD = "results/master_table.md"
+RESULTS_DIR = os.environ.get("RESULTS_DIR", "results/master_grid")
+OUT_CSV = os.environ.get("MASTER_TABLE_CSV", "results/master_table.csv")
+OUT_MD = os.path.splitext(OUT_CSV)[0] + ".md"
 LEGACY_PLACEBO = "placebo_long"
 
 
@@ -46,11 +46,17 @@ def paired_p(df, variant, cond_a, cond_b, col):
 
 
 def matched_partner(df, condition):
-    """For a demographic condition in the MATCHED block, the placebo_tok{N}
-    condition with the same token length. Returns None if there isn't one."""
+    """For a demographic condition in the MATCHED block, its token-matched
+    placebo. Newer runs record the pairing in `matched_placebo`; older runs are
+    resolved by the placebo_tok{N} naming convention. Returns None if none."""
     row = df[df.condition == condition]
     if row.empty:
         return None
+    if "matched_placebo" in df.columns:
+        rec = row["matched_placebo"].dropna()
+        rec = rec[rec != ""]
+        if len(rec):
+            return rec.iloc[0]
     n_tok = row["phrase_tokens"].iloc[0]
     name = f"placebo_tok{int(n_tok)}"
     return name if (df.condition == name).any() else None
@@ -147,7 +153,7 @@ def to_markdown(df, path):
 
 if __name__ == "__main__":
     paths = sorted(p for p in glob.glob(f"{RESULTS_DIR}/master_grid_*.csv")
-                   if "layerwise" not in p and "items" not in p)
+                   if "layerwise" not in p and "items" not in p and "pairing" not in p)
     if not paths:
         raise SystemExit(f"No master_grid_*.csv in {RESULTS_DIR}/ -- run master_grid.py first.")
     print("Reading:", *[f"\n  {p}" for p in paths])
@@ -155,7 +161,7 @@ if __name__ == "__main__":
     print(f"{len(df)} rows, models: {sorted(df.model.unique())}")
 
     table = summarize(df)
-    os.makedirs("results", exist_ok=True)
+    os.makedirs(os.path.dirname(OUT_CSV) or ".", exist_ok=True)
     table.to_csv(OUT_CSV, index=False)
     to_markdown(table, OUT_MD)
     print(f"\nwrote {OUT_CSV} and {OUT_MD}  ({len(table)} rows)")
