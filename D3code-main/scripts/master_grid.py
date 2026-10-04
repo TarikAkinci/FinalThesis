@@ -35,6 +35,10 @@ sub-grid aimed at one question, and the run plan is their deduplicated union.
              content-free elaboration so this block is not simply measuring
              "longer prompt".
 
+  PLACEBO_NULL  every PLACEBO_POOL phrase under `prefix`: a distribution of
+             content-free effects across lengths, so a demographic effect can
+             be compared against what content-free phrases of that length do.
+
 Item pool: see ITEM SELECTION below -- the in-band subset of the seeded
 500-item D3CODE eval sample, with entropy demoted from a selection filter to
 a recorded covariate.
@@ -78,7 +82,7 @@ from high_disagreement_items import rank_by_entropy
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
 MODEL_TAG = os.environ.get("MODEL_TAG", MODEL_NAME.split("/")[-1].replace(".", "-"))
 MAX_LENGTH = 1024
-RESULTS_DIR = "results/master_grid"
+RESULTS_DIR = os.environ.get("RESULTS_DIR", "results/master_grid")
 
 # ITEM SELECTION -------------------------------------------------------------
 # Baseline P(yes) must fall in this band. Items pinned near 0 or 1 at baseline
@@ -107,7 +111,7 @@ PREFLIGHT_ONLY = os.environ.get("PREFLIGHT_ONLY", "0") == "1"
 # Illustrative content-attention charts, prefix vs infix vs suffix, same phrase per
 # condition (so token length is identical across the three, verified locally -- see
 # conversation), to show the position effect visually alongside the aggregate numbers.
-FIGURES_DIR = "figures/master_grid"
+FIGURES_DIR = os.environ.get("FIGURES_DIR", "figures/master_grid")
 N_ILLUSTRATIVE = 3
 CHART_VARIANTS = ["prefix", "infix", "suffix"]
 SEGMENT_COLORS = {"demographic": "tab:red", "instruction": "tab:blue", "item_text": "tab:green"}
@@ -331,36 +335,77 @@ def n_tokens(tok, phrase):
     return len(tok(phrase, add_special_tokens=False)["input_ids"])
 
 
-def build_matched_conditions(tok):
-    """Register one exact token-matched placebo per distinct token length among
-    MATCHED_DEMOGRAPHICS, named placebo_tok{N}. Two demographics of the same
-    token length share a placebo, which is intended -- it is the same control.
-    Returns (matched_condition_names, pairing_rows) for logging."""
-    pool_lens = {}
-    for phrase, noun in PLACEBO_POOL:
-        pool_lens.setdefault(n_tokens(tok, phrase), (phrase, noun))
+MATCH_VARIANTS = STRUCTURE_VARIANTS + TARGET_VARIANTS + INFIX_VARIANTS
+_MATCH_SAMPLE_TEXT = "This is an example comment."
 
-    matched_names, pairing = [], []
+
+def in_context_span_lengths(tok, cond_name):
+    """Token length of the demographic span as it actually sits inside each
+    MATCH_VARIANTS prompt. The phrase-based variants carry the full sentence,
+    embedded/target carry only the noun phrase, and a leading space can change
+    tokenization, so a standalone token count is not enough for exact matching.
+    The span is delimited by fixed template text, so the item text used here
+    does not affect its length."""
+    out = {}
+    for v in MATCH_VARIANTS:
+        tokens = tokenize_only(tok, build_prompt_variant(tok, v, cond_name, _MATCH_SAMPLE_TEXT))
+        demo, _, _ = locate_spans(tokens, v, cond_name)
+        out[v] = None if demo is None else demo[1] - demo[0] + 1
+    return out
+
+
+def build_matched_conditions(tok):
+    """For each of MATCHED_DEMOGRAPHICS, pick the PLACEBO_POOL entry whose span
+    length matches the demographic's in every MATCH_VARIANTS prompt (minimum
+    total mismatch, pool order breaks ties), and register it as placebo_tok{N}
+    (N = standalone phrase token count, kept for continuity with earlier runs).
+    Returns (matched_condition_names, pairing_rows, demo_to_placebo)."""
+    pool_lengths = []
+    for i, (phrase, noun) in enumerate(PLACEBO_POOL):
+        CONDITIONS["_cand"] = (phrase, noun, "placebo", True)
+        pool_lengths.append(in_context_span_lengths(tok, "_cand"))
+    del CONDITIONS["_cand"]
+
+    matched_names, pairing, demo_to_placebo = [], [], {}
     for demo in MATCHED_DEMOGRAPHICS:
-        phrase = CONDITIONS[demo][0]
-        tlen = n_tokens(tok, phrase)
-        exact = pool_lens.get(tlen)
-        if exact is None:
-            nearest = min(pool_lens, key=lambda k: abs(k - tlen))
-            pairing.append((demo, tlen, pool_lens[nearest][0], nearest, "NEAREST"))
-            chosen, clen = pool_lens[nearest], nearest
-        else:
-            pairing.append((demo, tlen, exact[0], tlen, "exact"))
-            chosen, clen = exact, tlen
-        name = f"placebo_tok{clen}"
-        if name not in CONDITIONS:
-            CONDITIONS[name] = (chosen[0], chosen[1], "placebo", True)
+        demo_lens = in_context_span_lengths(tok, demo)
+
+        def mismatch(i):
+            return sum(abs(demo_lens[v] - pool_lengths[i][v]) for v in MATCH_VARIANTS)
+
+        best = min(range(len(PLACEBO_POOL)), key=mismatch)
+        phrase, noun = PLACEBO_POOL[best]
+        name = f"placebo_tok{n_tokens(tok, phrase)}"
+        if name in CONDITIONS and CONDITIONS[name][0] != phrase:
+            name = f"{name}_{best}"
+        CONDITIONS.setdefault(name, (phrase, noun, "placebo", True))
+        status = "exact" if mismatch(best) == 0 else f"MISMATCH={mismatch(best)}"
+        per_variant = ", ".join(f"{v}:{demo_lens[v]}/{pool_lengths[best][v]}" for v in MATCH_VARIANTS)
+        pairing.append((demo, name, phrase, status, per_variant))
         matched_names.append(name)
-    return sorted(set(matched_names)), pairing
+        demo_to_placebo[demo] = name
+    return sorted(set(matched_names)), pairing, demo_to_placebo
+
+
+def build_null_placebos():
+    """Register every PLACEBO_POOL phrase not already a condition as
+    placebo_pool{i:02d}. Run under `prefix` they give a distribution of
+    content-free effects across lengths 4-14 tokens, the null against which a
+    demographic phrase's effect (and per-head attention) is judged -- 3-5
+    placebos are too few, since content-free phrases differ a lot among
+    themselves. Call after build_matched_conditions."""
+    used = {v[0] for v in CONDITIONS.values()}
+    names = []
+    for i, (phrase, noun) in enumerate(PLACEBO_POOL):
+        if phrase in used:
+            continue
+        CONDITIONS[f"placebo_pool{i:02d}"] = (phrase, noun, "placebo", True)
+        names.append(f"placebo_pool{i:02d}")
+    return names
 
 
 def build_run_plan(matched_placebos):
-    """Deduplicated union of all four blocks.
+    """Deduplicated union of all blocks.
     Returns {(variant, condition): set-of-block-names}."""
     plan = {}
 
@@ -376,6 +421,7 @@ def build_run_plan(matched_placebos):
     add(["suffix", "reworded", "embedded"] + TARGET_VARIANTS + INFIX_VARIANTS, STRUCTURE_CONDITIONS, "structure")
     add(STRUCTURE_VARIANTS + TARGET_VARIANTS + INFIX_VARIANTS, MATCHED_DEMOGRAPHICS + matched_placebos, "matched")
     add(CONTEXT_VARIANTS, CONTEXT_CONDITIONS, "context")
+    add(["prefix"], [c for c, v in CONDITIONS.items() if v[3]], "placebo_null")
     return plan
 
 
@@ -429,19 +475,20 @@ if __name__ == "__main__":
     print(f"\nLoading model: {MODEL_NAME}")
     tok = AutoTokenizer.from_pretrained(MODEL_NAME)
 
-    matched_placebos, pairing = build_matched_conditions(tok)
-    print(f"\n=== Exact token-matched pairs (this model's tokenizer) ===")
-    for demo, dlen, pphrase, plen, status in pairing:
-        flag = "" if status == "exact" else "   <-- NO EXACT MATCH, nearest used"
-        print(f"  {demo:26s} {dlen:2d} tok  <->  {plen:2d} tok  \"{pphrase}\"{flag}")
+    matched_placebos, pairing, demo_to_placebo = build_matched_conditions(tok)
+    print(f"\n=== Token-matched pairs (in-context span length demo/placebo per variant) ===")
+    for demo, name, pphrase, status, per_variant in pairing:
+        flag = "" if status == "exact" else "   <-- NOT EXACT in every variant"
+        print(f"  {demo:24s} <-> {name:16s} \"{pphrase}\"  [{status}]{flag}\n      {per_variant}")
 
+    build_null_placebos()
     plan = build_run_plan(matched_placebos)
     by_block = {}
     for pair, blocks in plan.items():
         for b in blocks:
             by_block.setdefault(b, []).append(pair)
     print(f"\n=== Run plan: {len(plan)} unique (variant, condition) pairs ===")
-    for b in ["breadth", "structure", "matched", "context"]:
+    for b in ["breadth", "structure", "matched", "context", "placebo_null"]:
         print(f"  {b:10s} {len(by_block.get(b, []))} pairs")
 
     preflight(tok, plan, candidates["text"].head(3).tolist())
@@ -512,8 +559,12 @@ if __name__ == "__main__":
     result_rows, layer_rows, head_blocks, head_index = [], [], [], []
     baselines = {}
 
+    def span_len(span):
+        return sum(e - s + 1 for s, e in _span_list(span))
+
     def record(item, variant, cond_name, blocks, predicted, prob_yes,
-               b_pred, b_prob, seg, ok):
+               b_pred, b_prob, seg, ok, spans, seq_len):
+        demo_span, instr_span, text_span = spans
         if ok:
             per_layer = seg.mean(axis=1)
             d, i_, t, o = [float(x) for x in per_layer.mean(axis=0)]
@@ -529,9 +580,16 @@ if __name__ == "__main__":
             "entropy": item["entropy"], "variance": item["variance"],
             "p_offensive_raters": item["p_offensive"], "n_raters": item["n_raters"],
             "block": "|".join(sorted(blocks)), "variant": variant, "condition": cond_name,
+            "matched_placebo": demo_to_placebo.get(cond_name, ""),
             "axis": axis, "is_placebo": is_placebo,
             "phrase": phrase, "phrase_words": len(phrase.split()) if phrase else 0,
             "phrase_tokens": n_tokens(tok, phrase) if phrase else 0,
+            # token counts of the spans as actually located in the full prompt; can
+            # differ from phrase_tokens when a leading space or neighbour merges
+            "demo_span_tokens": span_len(demo_span),
+            "instr_span_tokens": span_len(instr_span),
+            "text_span_tokens": span_len(text_span),
+            "seq_len": seq_len,
             "predicted": predicted, "prob_yes": prob_yes,
             "baseline_pred": b_pred, "baseline_prob_yes": b_prob,
             "flipped_vs_baseline": predicted != b_pred,
@@ -551,7 +609,9 @@ if __name__ == "__main__":
                     "pct_instruction": b_, "pct_item_text": c_, "pct_other_scaffolding": e,
                 })
             head_blocks.append(seg.astype(np.float16))
-            head_index.append((item["item_id"], variant, cond_name))
+            head_index.append((item["item_id"], variant, cond_name,
+                               span_len(demo_span), span_len(instr_span),
+                               span_len(text_span), seq_len))
 
     with torch.no_grad():
         for i, (_, item) in enumerate(candidates.iterrows()):
@@ -560,7 +620,8 @@ if __name__ == "__main__":
             _, instr, txt = locate_spans(tokens, "prefix", "baseline")
             ok = _span_ok(instr) and txt is not None
             seg = segment_attention(attn_lh, None, instr, txt) if ok else None
-            record(item, "all", "baseline", {"baseline"}, pred, prob, pred, prob, seg, ok)
+            record(item, "all", "baseline", {"baseline"}, pred, prob, pred, prob, seg, ok,
+                   (None, instr, txt), len(tokens))
             baselines[item["item_id"]] = (pred, prob)
             if (i + 1) % 100 == 0:
                 print(f"  {i + 1}/{len(candidates)}", flush=True)
@@ -612,7 +673,7 @@ if __name__ == "__main__":
                 ok = demo is not None and _span_ok(instr) and txt is not None
                 seg = segment_attention(attn_lh, demo, instr, txt) if ok else None
                 record(item, variant, cond, plan[(variant, cond)], pred, prob,
-                       b_pred, b_prob, seg, ok)
+                       b_pred, b_prob, seg, ok, (demo, instr, txt), len(tokens))
                 if ok and item["item_id"] in chart_data and variant in CHART_VARIANTS and cond in CHART_CONDITIONS:
                     chart_data[item["item_id"]][variant][cond] = content_chart_entry(
                         attn_lh.mean(axis=(0, 1)), tokens, demo, instr, txt)
@@ -627,17 +688,27 @@ if __name__ == "__main__":
 
     results_df = pd.DataFrame(result_rows)
     results_df.to_csv(out_main, index=False)
+    if os.path.exists(out_main + ".partial"):
+        os.remove(out_main + ".partial")
     print(f"\nSaved {out_main}  ({len(results_df)} rows)")
 
     pd.DataFrame(layer_rows).to_csv(out_layer, index=False, compression="gzip")
     print(f"Saved {out_layer}  ({len(layer_rows)} rows)")
 
     head_arr = np.stack(head_blocks, axis=0)
-    idx = pd.DataFrame(head_index, columns=["item_id", "variant", "condition"])
+    idx = pd.DataFrame(head_index, columns=["item_id", "variant", "condition",
+                                            "demo_span_tokens", "instr_span_tokens",
+                                            "text_span_tokens", "seq_len"])
     np.savez_compressed(
-        out_head, attention=head_arr, item_id=idx["item_id"].values,
-        variant=idx["variant"].values.astype(str),
-        condition=idx["condition"].values.astype(str),
+        out_head, attention=head_arr, item_id=idx["item_id"].to_numpy(dtype=np.int64),
+        # explicit numpy unicode: pandas >= 3 string columns otherwise end up as
+        # object arrays, which np.load refuses without allow_pickle
+        variant=np.asarray(idx["variant"].tolist(), dtype=str),
+        condition=np.asarray(idx["condition"].tolist(), dtype=str),
+        demo_span_tokens=idx["demo_span_tokens"].to_numpy(dtype=np.int32),
+        instr_span_tokens=idx["instr_span_tokens"].to_numpy(dtype=np.int32),
+        text_span_tokens=idx["text_span_tokens"].to_numpy(dtype=np.int32),
+        seq_len=idx["seq_len"].to_numpy(dtype=np.int32),
         segments=np.array(SEGMENTS))
     print(f"Saved {out_head}  shape={head_arr.shape} (rows, layers, heads, segments), float16")
 
