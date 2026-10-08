@@ -1,0 +1,32 @@
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+500 items from items/items_v2.csv  split {'B': 250, 'A': 250}  categories {'random': 275, 'social-group': 153, 'moral': 72}
+
+Loading tokenizer: meta-llama/Llama-3.1-8B-Instruct
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+
+=== Matched placebos (exact span length in all 10 variants) ===
+  region_western_europe            [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_north_america             [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_latin_america             [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_arab_culture              [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_indian_cultural_sphere    [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_sinosphere                [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_sub_saharan_africa        [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_oceania                   [8, 10, 9, 10, 8, 8, 5, 5, 8, 8]  <-> placebo_maps, placebo_crossword
+  gender_man                       [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  gender_woman                     [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  religion_christian               [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  religion_muslim                  [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  identity_arab                    [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  identity_european                [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+
+=== Run plan: 10 variants x 22 conditions = 220 pairs ===
+  preflight 100/500 items
+  preflight 200/500 items
+  preflight 300/500 items
+  preflight 400/500 items
+  preflight 500/500 items
+Preflight OK: spans located and correctly placed for all 220 (variant, condition) pairs + baseline on all 500 item texts.
+
+PREFLIGHT_ONLY=1: OK. Span lengths written to results/v2/master_grid/matching_Llama-3-1-8B-Instruct.csv. Exiting before model load.

@@ -1,0 +1,17 @@
+models: ['Llama-3-1-8B-Instruct', 'Qwen2-5-7B-Instruct']
+  in band for Llama-3-1-8B-Instruct: 2034
+  in band for Qwen2-5-7B-Instruct: 670
+  in band for all: 554 of 4519
+
+wrote items/items_v2.csv: N=500  split {'B': 250, 'A': 250}
+              pool_share  eligible  selected    A    B
+category                                              
+moral              0.097       100        72   36   36
+random             0.376       301       275  138  137
+social-group       0.526       153       153   76   77
+
+selection bias check (pool vs selected):
+  mean human offensive fraction  0.339 vs 0.206
+  mean rating entropy            1.770 vs 1.490
+  mean baseline P(yes) Llama-3-1-8B-Instruct: 0.470
+  mean baseline P(yes) Qwen2-5-7B-Instruct: 0.532

@@ -9,3 +9,5 @@ __pycache__/
 D3code-main/dataset/mhs.csv
 .*.uMXxwd
 _cloud_bundle.tgz
+*.tgz
+D3code-main/scripts/results/v2/npz_parts/

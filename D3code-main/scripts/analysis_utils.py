@@ -23,8 +23,11 @@ MATCHED_DEMOGRAPHICS = ["religion_muslim", "gender_woman",
 
 
 def grid_csv_paths(results_dir):
-    return sorted(p for p in glob.glob(os.path.join(results_dir, "master_grid_*.csv"))
-                  if not any(k in os.path.basename(p) for k in ("layerwise", "items", "pairing")))
+    """v1 wrote master_grid_<MODEL>.csv, v2 writes master_grid_<MODEL>.csv.gz."""
+    paths = glob.glob(os.path.join(results_dir, "master_grid_*.csv")) + \
+        glob.glob(os.path.join(results_dir, "master_grid_*.csv.gz"))
+    return sorted(p for p in paths
+                  if not any(k in os.path.basename(p) for k in ("layerwise", "items", "pairing", "perhead")))
 
 
 def model_tag_from_path(path):
@@ -36,6 +39,13 @@ def model_tag_from_path(path):
 
 
 def _fill_matched_placebo(df):
+    """`matched_placebo` = one partner name per demographic row. v2 records all
+    exact-length partners in `matched_placebos` ("a|b"); the first is used here
+    and analyses that average over partners split that column themselves."""
+    if "matched_placebos" in df.columns:
+        df["matched_placebos"] = df["matched_placebos"].fillna("")
+        df["matched_placebo"] = df["matched_placebos"].str.split("|").str[0]
+        return df
     if "matched_placebo" not in df.columns:
         df["matched_placebo"] = ""
     df["matched_placebo"] = df["matched_placebo"].fillna("")
@@ -68,13 +78,14 @@ def load_grid(results_dir, model=None):
     return _fill_matched_placebo(df)
 
 
-def load_perhead(npz_path, grid=None, segment=None):
+def load_perhead(npz_path, grid=None, segment=None, kind="raw"):
     """Returns (attn, index) where attn is float32 (rows, layers, heads, 4) --
     or (rows, layers, heads) if `segment` is given -- and index is a DataFrame
     aligned to attn rows. If `grid` (that model's CSV rows) is passed,
     prob/delta/length/placebo columns are joined onto the index."""
     z = np.load(npz_path, allow_pickle=False)
-    attn = z["attention"]
+    # kind="vw": value-weighted attention (v2 npz only), same layout as raw
+    attn = z["attention_vw" if kind == "vw" else "attention"]
     attn = (attn if segment is None else attn[..., segment]).astype(np.float32)
     index = pd.DataFrame({"item_id": z["item_id"], "variant": z["variant"].astype(str),
                           "condition": z["condition"].astype(str)})
@@ -84,7 +95,8 @@ def load_perhead(npz_path, grid=None, segment=None):
     if grid is not None:
         keep = ["item_id", "variant", "condition", "prob_yes", "baseline_prob_yes",
                 "delta_prob_yes", "phrase_tokens", "length", "is_placebo", "axis",
-                "matched_placebo", "entropy"]
+                "matched_placebo", "matched_placebos", "entropy", "split", "logodds_yes",
+                "baseline_logodds_yes", "delta_logodds_yes"]
         g = grid[[c for c in keep if c in grid.columns]].drop_duplicates(["item_id", "variant", "condition"])
         dup = [c for c in g.columns if c in index.columns and c not in ("item_id", "variant", "condition")]
         index = index.merge(g.drop(columns=dup), on=["item_id", "variant", "condition"], how="left")

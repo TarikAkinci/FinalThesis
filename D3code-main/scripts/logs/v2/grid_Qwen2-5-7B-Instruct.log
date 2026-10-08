@@ -1,0 +1,187 @@
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+500 items from items/items_v2.csv  split {'B': 250, 'A': 250}  categories {'random': 275, 'social-group': 153, 'moral': 72}
+
+Loading tokenizer: Qwen/Qwen2.5-7B-Instruct
+
+=== Matched placebos (exact span length in all 10 variants) ===
+  region_western_europe            [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_north_america             [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_latin_america             [7, 9, 8, 9, 7, 7, 4, 4, 7, 7]  <-> placebo_early_riser, placebo_chess
+  region_arab_culture              [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_indian_cultural_sphere    [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_sinosphere                [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_sub_saharan_africa        [9, 11, 10, 11, 9, 9, 6, 6, 9, 9]  <-> placebo_stairs, placebo_tea
+  region_oceania                   [8, 10, 9, 10, 8, 8, 5, 5, 8, 8]  <-> placebo_maps, placebo_crossword
+  gender_man                       [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  gender_woman                     [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  religion_christian               [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  religion_muslim                  [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  identity_arab                    [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+  identity_european                [5, 7, 6, 7, 5, 5, 2, 2, 5, 5]  <-> placebo_runner, placebo_cyclist
+
+=== Run plan: 10 variants x 22 conditions = 220 pairs ===
+  preflight 100/500 items
+  preflight 200/500 items
+  preflight 300/500 items
+  preflight 400/500 items
+  preflight 500/500 items
+Preflight OK: spans located and correctly placed for all 220 (variant, condition) pairs + baseline on all 500 item texts.
+Loading weights, then moving to cuda
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|██████████| 339/339 [00:00<00:00, 15262.82it/s]
+
+=== Stage 1: baseline pass over 500 items ===
+  done in 0.1 min
+
+=== Stage 2: 220 pairs x 500 items = 110000 forward passes ===
+  1000/110000  elapsed 0.2 min  71.7 passes/s  ETA 25.3 min
+  2000/110000  elapsed 0.5 min  71.2 passes/s  ETA 25.3 min
+  3000/110000  elapsed 0.7 min  71.3 passes/s  ETA 25.0 min
+  4000/110000  elapsed 0.9 min  71.3 passes/s  ETA 24.8 min
+  5000/110000  elapsed 1.2 min  71.4 passes/s  ETA 24.5 min
+  6000/110000  elapsed 1.4 min  71.4 passes/s  ETA 24.3 min
+  7000/110000  elapsed 1.6 min  71.4 passes/s  ETA 24.0 min
+  8000/110000  elapsed 1.9 min  71.5 passes/s  ETA 23.8 min
+  9000/110000  elapsed 2.1 min  71.5 passes/s  ETA 23.6 min
+  10000/110000  elapsed 2.3 min  71.5 passes/s  ETA 23.3 min
+  11000/110000  elapsed 2.6 min  71.5 passes/s  ETA 23.1 min
+  12000/110000  elapsed 2.8 min  71.5 passes/s  ETA 22.8 min
+  13000/110000  elapsed 3.0 min  71.5 passes/s  ETA 22.6 min
+  14000/110000  elapsed 3.3 min  71.5 passes/s  ETA 22.4 min
+  15000/110000  elapsed 3.5 min  71.5 passes/s  ETA 22.1 min
+  16000/110000  elapsed 3.7 min  71.4 passes/s  ETA 21.9 min
+  17000/110000  elapsed 4.0 min  71.4 passes/s  ETA 21.7 min
+  18000/110000  elapsed 4.2 min  71.4 passes/s  ETA 21.5 min
+  19000/110000  elapsed 4.4 min  71.4 passes/s  ETA 21.2 min
+  20000/110000  elapsed 4.7 min  71.4 passes/s  ETA 21.0 min
+  21000/110000  elapsed 4.9 min  71.3 passes/s  ETA 20.8 min
+  22000/110000  elapsed 5.1 min  71.3 passes/s  ETA 20.6 min
+  23000/110000  elapsed 5.4 min  71.3 passes/s  ETA 20.3 min
+  24000/110000  elapsed 5.6 min  71.3 passes/s  ETA 20.1 min
+  25000/110000  elapsed 5.8 min  71.3 passes/s  ETA 19.9 min
+  26000/110000  elapsed 6.1 min  71.2 passes/s  ETA 19.7 min
+  27000/110000  elapsed 6.3 min  71.2 passes/s  ETA 19.4 min
+  28000/110000  elapsed 6.6 min  71.2 passes/s  ETA 19.2 min
+  29000/110000  elapsed 6.8 min  71.2 passes/s  ETA 19.0 min
+  30000/110000  elapsed 7.0 min  71.2 passes/s  ETA 18.7 min
+  31000/110000  elapsed 7.3 min  71.1 passes/s  ETA 18.5 min
+  32000/110000  elapsed 7.5 min  71.1 passes/s  ETA 18.3 min
+  33000/110000  elapsed 7.7 min  71.2 passes/s  ETA 18.0 min
+  34000/110000  elapsed 8.0 min  71.2 passes/s  ETA 17.8 min
+  35000/110000  elapsed 8.2 min  71.2 passes/s  ETA 17.6 min
+  36000/110000  elapsed 8.4 min  71.1 passes/s  ETA 17.4 min
+  37000/110000  elapsed 8.7 min  71.1 passes/s  ETA 17.1 min
+  38000/110000  elapsed 8.9 min  71.1 passes/s  ETA 16.9 min
+  39000/110000  elapsed 9.1 min  71.1 passes/s  ETA 16.6 min
+  40000/110000  elapsed 9.4 min  71.1 passes/s  ETA 16.4 min
+  41000/110000  elapsed 9.6 min  71.0 passes/s  ETA 16.2 min
+  42000/110000  elapsed 9.9 min  71.0 passes/s  ETA 16.0 min
+  43000/110000  elapsed 10.1 min  71.0 passes/s  ETA 15.7 min
+  44000/110000  elapsed 10.3 min  71.0 passes/s  ETA 15.5 min
+  45000/110000  elapsed 10.6 min  71.0 passes/s  ETA 15.3 min
+  46000/110000  elapsed 10.8 min  70.9 passes/s  ETA 15.0 min
+  47000/110000  elapsed 11.0 min  70.9 passes/s  ETA 14.8 min
+  48000/110000  elapsed 11.3 min  70.9 passes/s  ETA 14.6 min
+  49000/110000  elapsed 11.5 min  70.9 passes/s  ETA 14.3 min
+  50000/110000  elapsed 11.8 min  70.9 passes/s  ETA 14.1 min
+  51000/110000  elapsed 12.0 min  70.8 passes/s  ETA 13.9 min
+  52000/110000  elapsed 12.2 min  70.8 passes/s  ETA 13.6 min
+  53000/110000  elapsed 12.5 min  70.8 passes/s  ETA 13.4 min
+  54000/110000  elapsed 12.7 min  70.8 passes/s  ETA 13.2 min
+  55000/110000  elapsed 12.9 min  70.8 passes/s  ETA 12.9 min
+  56000/110000  elapsed 13.2 min  70.7 passes/s  ETA 12.7 min
+  57000/110000  elapsed 13.4 min  70.7 passes/s  ETA 12.5 min
+  58000/110000  elapsed 13.7 min  70.7 passes/s  ETA 12.3 min
+  59000/110000  elapsed 13.9 min  70.7 passes/s  ETA 12.0 min
+  60000/110000  elapsed 14.1 min  70.7 passes/s  ETA 11.8 min
+  61000/110000  elapsed 14.4 min  70.6 passes/s  ETA 11.6 min
+  62000/110000  elapsed 14.6 min  70.6 passes/s  ETA 11.3 min
+  63000/110000  elapsed 14.9 min  70.6 passes/s  ETA 11.1 min
+  64000/110000  elapsed 15.1 min  70.6 passes/s  ETA 10.9 min
+  65000/110000  elapsed 15.3 min  70.6 passes/s  ETA 10.6 min
+  66000/110000  elapsed 15.6 min  70.5 passes/s  ETA 10.4 min
+  67000/110000  elapsed 15.8 min  70.5 passes/s  ETA 10.2 min
+  68000/110000  elapsed 16.1 min  70.5 passes/s  ETA 9.9 min
+  69000/110000  elapsed 16.3 min  70.5 passes/s  ETA 9.7 min
+  70000/110000  elapsed 16.5 min  70.5 passes/s  ETA 9.5 min
+  71000/110000  elapsed 16.8 min  70.4 passes/s  ETA 9.2 min
+  72000/110000  elapsed 17.0 min  70.4 passes/s  ETA 9.0 min
+  73000/110000  elapsed 17.3 min  70.4 passes/s  ETA 8.8 min
+  74000/110000  elapsed 17.5 min  70.4 passes/s  ETA 8.5 min
+  75000/110000  elapsed 17.8 min  70.4 passes/s  ETA 8.3 min
+  76000/110000  elapsed 18.0 min  70.3 passes/s  ETA 8.1 min
+  77000/110000  elapsed 18.3 min  70.3 passes/s  ETA 7.8 min
+  78000/110000  elapsed 18.5 min  70.3 passes/s  ETA 7.6 min
+  79000/110000  elapsed 18.7 min  70.3 passes/s  ETA 7.3 min
+  80000/110000  elapsed 19.0 min  70.3 passes/s  ETA 7.1 min
+  81000/110000  elapsed 19.2 min  70.2 passes/s  ETA 6.9 min
+  82000/110000  elapsed 19.5 min  70.2 passes/s  ETA 6.6 min
+  83000/110000  elapsed 19.7 min  70.3 passes/s  ETA 6.4 min
+  84000/110000  elapsed 19.9 min  70.3 passes/s  ETA 6.2 min
+  85000/110000  elapsed 20.2 min  70.3 passes/s  ETA 5.9 min
+  86000/110000  elapsed 20.4 min  70.2 passes/s  ETA 5.7 min
+  87000/110000  elapsed 20.7 min  70.2 passes/s  ETA 5.5 min
+  88000/110000  elapsed 20.9 min  70.2 passes/s  ETA 5.2 min
+  89000/110000  elapsed 21.1 min  70.2 passes/s  ETA 5.0 min
+  90000/110000  elapsed 21.4 min  70.2 passes/s  ETA 4.7 min
+  91000/110000  elapsed 21.6 min  70.1 passes/s  ETA 4.5 min
+  92000/110000  elapsed 21.9 min  70.1 passes/s  ETA 4.3 min
+  93000/110000  elapsed 22.1 min  70.1 passes/s  ETA 4.0 min
+  94000/110000  elapsed 22.3 min  70.1 passes/s  ETA 3.8 min
+  95000/110000  elapsed 22.6 min  70.1 passes/s  ETA 3.6 min
+  96000/110000  elapsed 22.8 min  70.0 passes/s  ETA 3.3 min
+  97000/110000  elapsed 23.1 min  70.0 passes/s  ETA 3.1 min
+  98000/110000  elapsed 23.3 min  70.0 passes/s  ETA 2.9 min
+  99000/110000  elapsed 23.6 min  70.0 passes/s  ETA 2.6 min
+  100000/110000  elapsed 23.8 min  70.1 passes/s  ETA 2.4 min
+  101000/110000  elapsed 24.1 min  69.9 passes/s  ETA 2.1 min
+  102000/110000  elapsed 24.3 min  69.9 passes/s  ETA 1.9 min
+  103000/110000  elapsed 24.6 min  69.9 passes/s  ETA 1.7 min
+  104000/110000  elapsed 24.8 min  69.9 passes/s  ETA 1.4 min
+  105000/110000  elapsed 25.0 min  69.9 passes/s  ETA 1.2 min
+  106000/110000  elapsed 25.3 min  69.8 passes/s  ETA 1.0 min
+  107000/110000  elapsed 25.6 min  69.8 passes/s  ETA 0.7 min
+  108000/110000  elapsed 25.8 min  69.8 passes/s  ETA 0.5 min
+  109000/110000  elapsed 26.0 min  69.8 passes/s  ETA 0.2 min
+  110000/110000  elapsed 26.3 min  69.8 passes/s  ETA 0.0 min
+
+Saved results/v2/master_grid/master_grid_Qwen2-5-7B-Instruct.csv.gz  (110500 rows)
+Saved results/v2/master_grid/master_grid_perhead_Qwen2-5-7B-Instruct.npz  shape=(110500, 28, 28, 4) x2 (raw, value-weighted), float16
+
+=== Sanity checks ===
+  rows 110500 (expected 110500) -> OK
+  NaN in attention columns: 0
+  per-head content share in [0, 1]: min 0.0000 max 1.0022
+  (variant, condition) pairs whose span length varies across items: 0
+
+=== Noise check: first 20 items again ===
+  grid baseline vs select_items score (no output_attentions): max |dP| 1.11e-16, mean |dP| 2.86e-17
+  identical input run twice: max |dP| 0.00e+00, max |d logodds| 0.00e+00  (4420 passes) -> results/v2/master_grid/noise_Qwen2-5-7B-Instruct.csv
+
+=== Mean signed delta P(yes) by condition x variant ===
+variant                        prefix  reworded  imagine  consider  infix  suffix  embedded  target  context  context_long
+condition                                                                                                                 
+gender_man                      0.318     0.311    0.291     0.335  0.004  -0.220     0.159  -0.137    0.204         0.330
+gender_woman                    0.345     0.372    0.335     0.397  0.131  -0.211     0.147  -0.189    0.308         0.396
+identity_arab                   0.350     0.324    0.368     0.323  0.155  -0.450    -0.043  -0.365    0.132         0.262
+identity_european               0.326     0.341    0.403     0.340  0.239  -0.282     0.135   0.029    0.204         0.315
+placebo_chess                   0.199     0.187    0.227     0.225  0.020   0.056    -0.177  -0.456    0.129         0.248
+placebo_crossword               0.160     0.229    0.183     0.229  0.342  -0.126     0.249  -0.381    0.116         0.209
+placebo_cyclist                 0.316     0.296    0.282     0.279  0.115   0.184    -0.064  -0.428    0.182         0.302
+placebo_early_riser             0.251     0.165    0.171     0.211  0.073  -0.045     0.106  -0.224    0.179         0.267
+placebo_maps                    0.263     0.202    0.171     0.233  0.049  -0.183     0.032  -0.497    0.226         0.289
+placebo_runner                  0.309     0.325    0.294     0.315 -0.017   0.127     0.071  -0.096    0.220         0.328
+placebo_stairs                 -0.049     0.001    0.027     0.028 -0.075   0.021    -0.182  -0.447   -0.012         0.166
+placebo_tea                    -0.101    -0.185   -0.143    -0.147 -0.088  -0.064    -0.329  -0.515   -0.063         0.098
+region_arab_culture             0.349     0.373    0.352     0.334  0.361  -0.373     0.218   0.043    0.213         0.314
+region_indian_cultural_sphere   0.336     0.359    0.354     0.324  0.294  -0.412     0.015   0.007    0.240         0.319
+region_latin_america            0.310     0.337    0.334     0.308  0.298  -0.365     0.104  -0.049    0.246         0.315
+region_north_america            0.313     0.330    0.302     0.316  0.258  -0.266     0.246   0.372    0.260         0.337
+region_oceania                  0.319     0.281    0.291     0.233  0.120  -0.322     0.048  -0.148    0.198         0.293
+region_sinosphere               0.356     0.367    0.325     0.347  0.236  -0.281     0.139   0.216    0.248         0.329
+region_sub_saharan_africa       0.391     0.390    0.394     0.365  0.382  -0.376     0.219  -0.159    0.294         0.362
+region_western_europe           0.343     0.358    0.342     0.332  0.340  -0.240     0.242   0.361    0.277         0.337
+religion_christian              0.304     0.302    0.351     0.317  0.248  -0.204     0.110  -0.059    0.076         0.225
+religion_muslim                 0.354     0.341    0.355     0.347  0.111  -0.364    -0.033  -0.280    0.108         0.166
+
+Saved 9 illustrative charts to figures/v2/content_attention_charts/

@@ -28,9 +28,11 @@ def _char_span_to_token_span(offsets, idx, end_char):
     return start_idx, end_idx
 
 
-def find_token_span(tokens, target_text):
+def find_token_span(tokens, target_text, last=False):
     """target_text: literal substring to locate. Returns inclusive
-    (start_idx, end_idx) or None.
+    (start_idx, end_idx) or None. last=True takes the LAST occurrence: use it
+    for any span the template places after the item text, otherwise an item
+    whose own text contains the string (e.g. "a man") captures the match.
 
     NOTE: only safe for FIXED strings we control (the instruction text, a
     demographic phrase). For arbitrary item text, use find_span_by_delimiters
@@ -39,7 +41,7 @@ def find_token_span(tokens, target_text):
     ends with a literal '"'), which can make substring search land on the
     wrong occurrence or otherwise misbehave."""
     offsets, full = _reconstruct(tokens)
-    idx = full.find(target_text)
+    idx = full.rfind(target_text) if last else full.find(target_text)
     if idx == -1:
         return None
     end_char = idx + len(target_text)

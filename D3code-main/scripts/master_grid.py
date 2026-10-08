@@ -1,55 +1,46 @@
 """
-Consolidated grid run: one job that fills every column of the master table.
+Master grid, v2 design: every condition under every prompt variant, on one
+frozen item list shared by all models.
 
-Design is BLOCK-based rather than one full conditions x variants factorial.
-A full factorial over 17 conditions x 8 structures x 500 items is ~68k forward
-passes, most of them redundant -- the breadth question ("do the 8 D3CODE
-regions differ?") does not need all 8 prompt structures to answer, and the
-structure question does not need all 17 conditions. Each block below is a
-sub-grid aimed at one question, and the run plan is their deduplicated union.
+What changed from the LRZ (v1) grid, and why
+  - Items: read from the frozen list written by select_items.py (whole
+    D3CODE pool, in band for BOTH models, same N, same 50/50 selection/test
+    split). v1 filtered per model and ended with 236 vs 64 items.
+  - Full factorial instead of blocks: all 22 conditions x all 10 variants, so
+    every comparison has the same items and the same set of conditions.
+  - Phrases are built from one noun per condition through fixed templates
+    ("You are {noun}.", "Imagine you are {noun}.", "As {noun}, ..."), so a
+    demographic and a placebo differ only in the noun.
+  - Placebos: 8 content-free nouns, two per token length the demographics
+    need (2, 4, 5, 6 tokens). Every demographic gets its exact-length placebos
+    as matched partners. Llama and Qwen tokenize all of these to the same
+    length in every variant (checked by check_matching.py), so the matching is
+    identical across models too.
+  - Context variants use ONE elaboration sentence for demographics and
+    placebos alike (v1 had "offensive" vs "refreshing"). The demographic span
+    is the identity sentence only; the shared elaboration is not part of it.
+  - Log-odds of "1" vs "0" are recorded next to P(yes): no saturation at 0/1.
+  - Value-weighted attention (Kobayashi et al. 2020) per head next to raw
+    attention: attention x ||W_O^h v_j||, renormalized per head.
+  - Noise check at the end: the first NOISE_ITEMS items are run again and
+    compared to their grid rows, and grid baselines are compared to the
+    select_items.py scores (different code path: no output_attentions).
 
-  BREADTH    all 8 D3CODE regions + gender + religion + bare identity +
-             3 placebos, under `prefix` only.
-             Answers: is "Arab Culture" actually special, or does every
-             non-Western region behave the same way? Previously only Western
-             Europe vs Arab Culture were tested, which cannot distinguish
-             "Arab is special" from "anything not Western Europe is special".
+Variants (demographic span in brackets):
+  prefix        [You are X.] Text: "..." Is this text offensive? ...
+  reworded      [Assume you are X.] Text: ...          (paraphrase templates,
+  imagine       [Imagine you are X.] Text: ...          all in prefix position)
+  consider      [Consider that you are X.] Text: ...
+  infix         Text: "..." [You are X.] Is this text offensive? ...
+  suffix        Text: "..." Is this text offensive? ... [You are X.]
+  embedded      Text: "..." As [X], is this text offensive? ...
+  target        Text: "..." Do you think this text is offensive for [X]? ...
+  context       [You are X.] <elaboration> Text: ...
+  context_long  [You are X.] <elaboration> Answer from that perspective. Text: ...
 
-  STRUCTURE  the 5 conditions carried over from the previous study, under
-             suffix/reworded/embedded. Keeps continuity with the existing
-             table (their `prefix` rows come from BREADTH).
-
-  MATCHED    EXACT token-matched demographic/placebo pairs under all 4
-             structures. Word-count matching was the previous approximation;
-             this matches real tokenizer output. For each selected
-             demographic phrase we find a content-free placebo from
-             PLACEBO_POOL with an identical token count, so any remaining
-             difference cannot be attributed to prompt length. Matching runs
-             at runtime against whichever model's tokenizer is loaded, and
-             the resulting pairing is printed, because Llama and Qwen
-             tokenize these phrases differently.
-
-  CONTEXT    elaborated framings: the demographic phrase plus a sentence of
-             context, and a longer version that also instructs the model to
-             answer from that perspective. Placebos get a length-matched,
-             content-free elaboration so this block is not simply measuring
-             "longer prompt".
-
-  PLACEBO_NULL  every PLACEBO_POOL phrase under `prefix`: a distribution of
-             content-free effects across lengths, so a demographic effect can
-             be compared against what content-free phrases of that length do.
-
-Item pool: see ITEM SELECTION below -- the in-band subset of the seeded
-500-item D3CODE eval sample, with entropy demoted from a selection filter to
-a recorded covariate.
-
-Per-layer and per-head attention is recorded for every row. This costs no
-extra forward passes: the same output_attentions call already contains it,
-the earlier scripts just averaged it away before writing.
-
-Model-parameterized so the identical grid runs on Qwen2.5-7B for a
-model-comparison axis. A tokenizer-only preflight aborts before the model
-reaches the GPU if any span is unlocatable under that model's chat template.
+Per-layer and per-head attention is stored for every row (npz), at no extra
+forward passes. A tokenizer-only preflight aborts before the model loads if
+any span is unlocatable or any matched pair is not exact.
 """
 import os
 import time
@@ -58,16 +49,12 @@ import pandas as pd
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import matplotlib
-matplotlib.use("Agg")   # imported at module load, not inside __main__, so a missing
-import matplotlib.pyplot as plt   # matplotlib install shows up immediately at script
-                                   # start (like the earlier sklearn issue), not mid-run
+matplotlib.use("Agg")   # imported at module load so a missing install fails at start, not mid-run
+import matplotlib.pyplot as plt
 
-# torch >= 2.13 routes some eager CUDA ops (e.g. the RoPE outer-product bmm, RMSNorm, topk)
-# through experimental Triton / CuTe-DSL kernels. On the LRZ nodes the first such call makes
-# Triton compile a small C helper with gcc, which fails there, and every forward pass dies
-# (see the smoke-test logs). Switching the overrides off sends those ops back to PyTorch's
-# regular cuBLAS/ATen path. Numerically equivalent, and needs no compiler on the node.
-# Guarded: on a torch without these modules this is a no-op rather than an error.
+# torch >= 2.13 routes some eager CUDA ops through experimental Triton / CuTe-DSL
+# kernels that need gcc at runtime (this killed the LRZ smoke test). Switching the
+# overrides off sends those ops back to the regular ATen path. No-op elsewhere.
 for _mod in ("triton_utils", "cutedsl_utils"):
     try:
         getattr(__import__("torch._native", fromlist=[_mod]), _mod).deregister_op_overrides()
@@ -77,162 +64,95 @@ for _mod in ("triton_utils", "cutedsl_utils"):
 
 from span_utils import find_token_span, find_span_by_delimiters
 from zeroshot_two_datasets import PROMPT
-from high_disagreement_items import rank_by_entropy
 
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
-MODEL_TAG = os.environ.get("MODEL_TAG", MODEL_NAME.split("/")[-1].replace(".", "-"))
+MODEL_TAG = os.environ.get("MODEL_TAG", MODEL_NAME.rstrip("/").split("/")[-1].replace(".", "-"))
 MAX_LENGTH = 1024
-RESULTS_DIR = os.environ.get("RESULTS_DIR", "results/master_grid")
-
-# ITEM SELECTION -------------------------------------------------------------
-# Baseline P(yes) must fall in this band. Items pinned near 0 or 1 at baseline
-# have no room for any perturbation to move the prediction further in that
-# direction, so their delta is mechanically compressed toward zero regardless
-# of what the prompt says. This was a real, diagnosed confound in the earlier
-# entropy-only selection and the filter stays.
-MIN_BASELINE_PROB = 0.02
-MAX_BASELINE_PROB = 0.98
-# Entropy is NO LONGER a selection criterion -- it is written to every row as a
-# covariate instead. Selecting on disagreement up front both shrinks the sample
-# and bakes in a selection effect; keeping it as a column lets the analysis ask
-# "does rater disagreement predict prompt sensitivity?" as a regression across
-# the full in-band range, which is strictly more informative than pre-filtering.
-# Set MAX_ITEMS to cap the run for a smoke test; 0 means no cap.
-MAX_ITEMS = int(os.environ.get("MAX_ITEMS", "0"))
-# A capped run is a smoke test: write it to a separate directory so a leftover 3-item
-# file can never sit next to (or be mistaken for) a real result.
+RESULTS_DIR = os.environ.get("RESULTS_DIR", "results/v2/master_grid")
+ITEMS_CSV = os.environ.get("ITEMS_CSV", "items/items_v2.csv")
+SCORES_DIR = os.environ.get("SCORES_DIR", "results/v2/scores")
+MAX_ITEMS = int(os.environ.get("MAX_ITEMS", "0"))        # >0: smoke test on the first N items
 if MAX_ITEMS:
     RESULTS_DIR = RESULTS_DIR + "_smoke"
-# Exit right after the tokenizer-only preflight, before the model loads. Runs on a CPU
-# node: checks imports, data, item ranking, token matching and span-finding for this
-# model's chat template without occupying a GPU.
 PREFLIGHT_ONLY = os.environ.get("PREFLIGHT_ONLY", "0") == "1"
-
-# Illustrative content-attention charts, prefix vs infix vs suffix, same phrase per
-# condition (so token length is identical across the three, verified locally -- see
-# conversation), to show the position effect visually alongside the aggregate numbers.
-FIGURES_DIR = os.environ.get("FIGURES_DIR", "figures/master_grid")
+NOISE_ITEMS = int(os.environ.get("NOISE_ITEMS", "20"))
+FIGURES_DIR = os.environ.get("FIGURES_DIR", "figures/v2")
 N_ILLUSTRATIVE = 3
-CHART_VARIANTS = ["prefix", "infix", "suffix"]
-SEGMENT_COLORS = {"demographic": "tab:red", "instruction": "tab:blue", "item_text": "tab:green"}
-CHECKPOINT_EVERY = 1000   # grid passes between partial saves of the main CSV
+CHECKPOINT_EVERY = 5000
 
 SEGMENTS = ["demographic", "instruction", "item_text", "other"]
+SEGMENT_COLORS = {"demographic": "tab:red", "instruction": "tab:blue", "item_text": "tab:green"}
 
 INSTRUCTION_TEXT = "Is this text offensive? Answer with only 0 (no) or 1 (yes)."
 INSTRUCTION_TEXT_EMBEDDED = "is this text offensive? Answer with only 0 (no) or 1 (yes)."
-# "target" variant: asks whether the text is offensive FOR/TO a group, rather than
-# having the model self-identify AS that group ("As a woman, is this offensive?"). A
-# semantically distinct manipulation, not a cosmetic one. The noun sits inside the
-# question, splitting the instruction into a before- and after-fragment around it.
 TARGET_BEFORE = "Do you think this text is offensive for "
 TARGET_AFTER = "? Answer with only 0 (no) or 1 (yes)."
 TEXT_PREFIX, _ = PROMPT.split("{text}")
 TEXT_SUFFIX = '"\n'
-
-# Elaborations for the CONTEXT block. Deliberately parallel in structure and
-# equal in word count so the demographic and placebo versions differ in content
-# only, not in how much text was added.
-ELABORATION_DEMO = "Your background, values, and everyday experience shape what you find offensive."
-ELABORATION_PLACEBO = "Your background, habits, and everyday routine shape what you find refreshing."
+# One elaboration for demographics and placebos alike, so the context variants
+# differ between conditions only in the identity sentence.
+ELABORATION = "Your background and everyday experience shape how you read things."
 PERSPECTIVE = "Answer from that perspective."
 
+# --- conditions ---------------------------------------------------------------
+# name -> (noun, axis, is_placebo). Every phrase is built from the noun through
+# the templates below, identically for demographics and placebos.
+CONDITIONS = {
+    # all 8 D3CODE Region values, verbatim
+    "region_western_europe": ("someone from Western Europe", "region", False),
+    "region_north_america": ("someone from North America", "region", False),
+    "region_latin_america": ("someone from Latin America", "region", False),
+    "region_arab_culture": ("someone from the Arab Culture region", "region", False),
+    "region_indian_cultural_sphere": ("someone from the Indian Cultural Sphere", "region", False),
+    "region_sinosphere": ("someone from the Sinosphere", "region", False),
+    "region_sub_saharan_africa": ("someone from Sub Saharan Africa", "region", False),
+    "region_oceania": ("someone from Oceania", "region", False),
+    "gender_man": ("a man", "gender", False),
+    "gender_woman": ("a woman", "gender", False),
+    "religion_christian": ("a Christian", "religion", False),
+    "religion_muslim": ("a Muslim", "religion", False),
+    "identity_arab": ("an Arab", "identity", False),
+    "identity_european": ("a European", "identity", False),
+    # content-free placebos, two per demographic noun length (2, 4, 5, 6 tokens
+    # under both tokenizers). Hobbies and habits only: no group, origin, belief,
+    # occupation or trait a D3CODE rater demographic could encode.
+    "placebo_runner": ("a runner", "placebo", True),
+    "placebo_cyclist": ("a cyclist", "placebo", True),
+    "placebo_early_riser": ("an early riser", "placebo", True),
+    "placebo_chess": ("someone who plays chess", "placebo", True),
+    "placebo_maps": ("someone who collects old maps", "placebo", True),
+    "placebo_crossword": ("someone who enjoys crossword puzzles", "placebo", True),
+    "placebo_stairs": ("someone who usually takes the stairs", "placebo", True),
+    # the placebo every v1 study used; kept for continuity. It was the outlier
+    # placebo in v1 and "tea over coffee" may read as a cultural cue, so check it
+    # separately before pooling it with the others.
+    "placebo_tea": ("someone who prefers tea over coffee", "placebo", True),
+}
+DEMOGRAPHICS = [c for c, v in CONDITIONS.items() if not v[2]]
+PLACEBOS = [c for c, v in CONDITIONS.items() if v[2]]
 
-def _reword(phrase):
-    """Uniform +1-word transformation, applied identically to every phrase.
-    Kept mechanical so the reworded variant can never drift back into the
-    length asymmetry that an earlier hand-typed version had."""
-    assert phrase.startswith("You ")
-    return "Assume you " + phrase[4:]
+SENTENCE_TEMPLATES = {          # identity sentence per variant
+    "prefix": "You are {n}.", "reworded": "Assume you are {n}.",
+    "imagine": "Imagine you are {n}.", "consider": "Consider that you are {n}.",
+    "infix": "You are {n}.", "suffix": "You are {n}.",
+    "context": "You are {n}.", "context_long": "You are {n}.",
+}
+VARIANTS = ["prefix", "reworded", "imagine", "consider", "infix", "suffix",
+            "embedded", "target", "context", "context_long"]
+PARAPHRASE_VARIANTS = ["prefix", "reworded", "imagine", "consider"]
+AFTER_TEXT_VARIANTS = ["infix", "suffix", "embedded", "target"]   # identity placed after the item text
+
+CHART_VARIANTS = ["prefix", "infix", "suffix"]
+CHART_CONDITIONS = ["gender_woman", "religion_muslim", "region_western_europe",
+                    "region_arab_culture", "placebo_runner", "placebo_stairs"]
 
 
-# --- conditions -------------------------------------------------------------
-# (phrase, noun_phrase_for_embedded, axis, is_placebo)
-# Region names are D3CODE's own Region values, verbatim, all 8 of them.
-def _region(key, display, noun_display=None):
-    noun = noun_display or display
-    return (f"region_{key}", (f"You are someone from {display}.",
-                              f"someone from {noun}", "region", False))
+def noun(cond_name):
+    return CONDITIONS[cond_name][0]
 
 
-CONDITIONS = dict([
-    _region("western_europe", "Western Europe"),
-    _region("north_america", "North America"),
-    _region("latin_america", "Latin America"),
-    _region("arab_culture", "the Arab Culture region"),
-    _region("indian_cultural_sphere", "the Indian Cultural Sphere"),
-    _region("sinosphere", "the Sinosphere"),
-    _region("sub_saharan_africa", "Sub Saharan Africa"),
-    _region("oceania", "Oceania"),
-    ("gender_man", ("You are a man.", "a man", "gender", False)),
-    ("gender_woman", ("You are a woman.", "a woman", "gender", False)),
-    # wording carried over verbatim from attention_probe.py's CONDITIONS
-    ("religion_christian", ("You are Christian.", "a Christian", "religion", False)),
-    ("religion_muslim", ("You are Muslim.", "a Muslim", "religion", False)),
-    # bare identity, to separate "Arab" the identity from the long region phrase
-    ("identity_arab", ("You are Arab.", "an Arab", "identity", False)),
-    ("identity_european", ("You are European.", "a European", "identity", False)),
-    # core placebos, kept as fixed phrases. placebo_long is the exact sentence
-    # every previous study used, so those results stay comparable.
-    ("placebo_short", ("You are left-handed.", "someone left-handed", "placebo", True)),
-    ("placebo_mid", ("You are a swimmer.", "a swimmer", "placebo", True)),
-    ("placebo_long", ("You are someone who prefers tea over coffee.",
-                      "someone who prefers tea over coffee", "placebo", True)),
-])
-
-# Candidate placebos for EXACT token matching in the MATCHED block. Spans a
-# range of lengths so a match exists for each demographic phrase under either
-# model's tokenizer. All are content-free with respect to the task: none names
-# a group, an origin, a belief, or anything a rater demographic could encode.
-PLACEBO_POOL = [
-    # Deliberately dense across the 4-14 token range, with several phrases per
-    # length, because an EXACT match has to exist under whichever tokenizer is
-    # loaded and Llama and Qwen split these differently. All are content-free
-    # with respect to the task: none names a group, an origin, a belief, or
-    # anything a D3CODE rater demographic could encode.
-    ("You are tall.", "someone tall"),
-    ("You are calm.", "someone calm"),
-    ("You are punctual.", "someone punctual"),
-    ("You are a runner.", "a runner"),
-    ("You are left-handed.", "someone left-handed"),
-    ("You are a swimmer.", "a swimmer"),
-    ("You are a morning person.", "a morning person"),
-    ("You are an occasional cyclist.", "an occasional cyclist"),
-    ("You are an early riser.", "an early riser"),
-    ("You are a frequent walker.", "a frequent walker"),
-    ("You are someone who bakes.", "someone who bakes"),
-    ("You are someone who prefers tea.", "someone who prefers tea"),
-    ("You are someone who collects old maps.", "someone who collects old maps"),
-    ("You are someone who enjoys crossword puzzles.", "someone who enjoys crossword puzzles"),
-    ("You are someone who prefers tea over coffee.", "someone who prefers tea over coffee"),
-    ("You are someone who keeps a tidy desk drawer.", "someone who keeps a tidy desk drawer"),
-    ("You are someone who usually takes the stairs instead.", "someone who usually takes the stairs instead"),
-    ("You are someone who prefers window seats on long flights.",
-     "someone who prefers window seats on long flights"),
-    ("You are someone who waters the office plants every other week.",
-     "someone who waters the office plants every other week"),
-    ("You are someone who always carries a spare umbrella in their bag.",
-     "someone who always carries a spare umbrella in their bag"),
-]
-
-# Demographic phrases to build exact token-matched placebo pairs for. Chosen to
-# span the full length range and to include the two conditions the earlier
-# results hinged on (Western Europe and Arab Culture).
-MATCHED_DEMOGRAPHICS = ["religion_muslim", "gender_woman",
-                        "region_western_europe", "region_arab_culture"]
-
-STRUCTURE_CONDITIONS = ["gender_man", "gender_woman", "region_western_europe",
-                        "region_arab_culture", "placebo_long"]
-# same 5 conditions, reused as which rows the illustrative content-attention
-# charts show (defined here, after STRUCTURE_CONDITIONS exists to alias)
-CHART_CONDITIONS = STRUCTURE_CONDITIONS
-CONTEXT_CONDITIONS = ["gender_woman", "region_western_europe", "region_arab_culture",
-                      "region_sinosphere", "placebo_mid", "placebo_long"]
-
-STRUCTURE_VARIANTS = ["prefix", "suffix", "reworded", "embedded"]
-TARGET_VARIANTS = ["target"]
-INFIX_VARIANTS = ["infix"]
-CONTEXT_VARIANTS = ["context", "context_long"]
+def identity_sentence(variant, cond_name):
+    return SENTENCE_TEMPLATES[variant].format(n=noun(cond_name))
 
 
 def build_content(variant, cond_name, text):
@@ -240,45 +160,33 @@ def build_content(variant, cond_name, text):
     base = PROMPT.format(text=text)
     if cond_name == "baseline":
         return base
-    phrase, noun, axis, is_placebo = CONDITIONS[cond_name]
-    if variant == "prefix":
-        return f"{phrase} {base}"
+    if variant in PARAPHRASE_VARIANTS:
+        return f"{identity_sentence(variant, cond_name)} {base}"
     if variant == "suffix":
-        return f"{base} {phrase}"
+        return f"{base} {identity_sentence(variant, cond_name)}"
     if variant == "infix":
-        return f'Text: "{text}"\n{phrase} {INSTRUCTION_TEXT}'
-    if variant == "reworded":
-        return f"{_reword(phrase)} {base}"
+        return f'Text: "{text}"\n{identity_sentence(variant, cond_name)} {INSTRUCTION_TEXT}'
     if variant == "embedded":
-        return f'Text: "{text}"\nAs {noun}, {INSTRUCTION_TEXT_EMBEDDED}'
+        return f'Text: "{text}"\nAs {noun(cond_name)}, {INSTRUCTION_TEXT_EMBEDDED}'
     if variant == "target":
-        return f'Text: "{text}"\n{TARGET_BEFORE}{noun}{TARGET_AFTER}'
+        return f'Text: "{text}"\n{TARGET_BEFORE}{noun(cond_name)}{TARGET_AFTER}'
     if variant == "context":
-        return f"{phrase} {_elaboration(is_placebo)} {base}"
+        return f"{identity_sentence(variant, cond_name)} {ELABORATION} {base}"
     if variant == "context_long":
-        return f"{phrase} {_elaboration(is_placebo)} {PERSPECTIVE} {base}"
+        return f"{identity_sentence(variant, cond_name)} {ELABORATION} {PERSPECTIVE} {base}"
     raise ValueError(variant)
 
 
-def _elaboration(is_placebo):
-    return ELABORATION_PLACEBO if is_placebo else ELABORATION_DEMO
-
-
 def demographic_target(variant, cond_name):
-    """The exact literal string that constitutes the 'demographic' segment for
-    this (variant, condition). For the context variants this deliberately
-    includes the elaboration: the whole injected block is what we are measuring
-    attention to, not just its first sentence."""
-    phrase, noun, axis, is_placebo = CONDITIONS[cond_name]
+    """The literal string that forms the 'demographic' segment: the identity
+    sentence, or just the noun for embedded/target."""
     if variant in ("embedded", "target"):
-        return noun
-    if variant == "reworded":
-        return _reword(phrase)
-    if variant == "context":
-        return f"{phrase} {_elaboration(is_placebo)}"
-    if variant == "context_long":
-        return f"{phrase} {_elaboration(is_placebo)} {PERSPECTIVE}"
-    return phrase
+        return noun(cond_name)
+    return identity_sentence(variant, cond_name)
+
+
+def phrase_of(variant, cond_name):
+    return "" if cond_name == "baseline" else demographic_target(variant, cond_name)
 
 
 def build_prompt_variant(tok, variant, cond_name, text):
@@ -288,10 +196,8 @@ def build_prompt_variant(tok, variant, cond_name, text):
 
 
 def _span_list(span):
-    """Normalize a span -- None, a single (start,end) tuple, or a list of those
-    (possibly containing unresolved Nones) -- into a flat list of resolved tuples.
-    Used because "target" needs two disjoint instruction fragments where every
-    other variant needs only one contiguous span."""
+    """None / (s,e) / list of (s,e)-or-None -> flat list of resolved tuples.
+    "target" has two instruction fragments, every other variant one."""
     if span is None:
         return []
     if isinstance(span, list):
@@ -300,8 +206,6 @@ def _span_list(span):
 
 
 def _span_ok(span):
-    """True if a span (any of the three representations above) is fully
-    resolved -- for a list, every sub-span must be found, not just one."""
     if span is None:
         return False
     if isinstance(span, list):
@@ -309,241 +213,242 @@ def _span_ok(span):
     return True
 
 
+def span_len(span):
+    return sum(e - s + 1 for s, e in _span_list(span))
+
+
 def locate_spans(tokens, variant, cond_name):
-    """Returns (demo_span, instr_span, text_span). demo_span/text_span are a
-    single (start,end) tuple or None. instr_span is a single tuple for every
-    variant except "target", where it is a list of two tuples/Nones (the
-    instruction fragment before and after the embedded noun phrase). Use
-    _span_list()/_span_ok() rather than checking `is not None` directly, since
-    that only works for the single-tuple case.
-    """
-    if cond_name == "baseline":
-        demo_span = None
-    else:
-        demo_span = find_token_span(tokens, demographic_target(variant, cond_name))
+    """(demo_span, instr_span, text_span); instr_span is a list of two spans
+    for "target", a single span otherwise.
+
+    Anything the template puts AFTER the item text is searched from the end
+    (last=True): item texts can contain the same words ("a man", "a Muslim"),
+    and a first-occurrence search would then land inside the item text. Spans
+    before the item text keep the first occurrence for the same reason."""
+    after_text = variant in AFTER_TEXT_VARIANTS
+    demo_span = None if cond_name == "baseline" else \
+        find_token_span(tokens, demographic_target(variant, cond_name), last=after_text)
     if variant == "target":
-        instr_span = [find_token_span(tokens, TARGET_BEFORE),
-                      find_token_span(tokens, TARGET_AFTER)]
+        # searched without its trailing space: the space is part of the noun's first
+        # token (" someone"), which would otherwise count in both segments
+        instr_span = [find_token_span(tokens, TARGET_BEFORE.rstrip(), last=True),
+                      find_token_span(tokens, TARGET_AFTER, last=True)]
     else:
-        instr = INSTRUCTION_TEXT_EMBEDDED if variant == "embedded" else INSTRUCTION_TEXT
-        instr_span = find_token_span(tokens, instr)
+        instr_span = find_token_span(tokens, INSTRUCTION_TEXT_EMBEDDED if variant == "embedded"
+                                     else INSTRUCTION_TEXT, last=True)
     text_span = find_span_by_delimiters(tokens, TEXT_PREFIX, TEXT_SUFFIX)
     return demo_span, instr_span, text_span
+
+
+def tokenize_only(tok, prompt_text):
+    ids = tok(prompt_text, truncation=True, max_length=MAX_LENGTH,
+              add_special_tokens=False)["input_ids"]
+    return tok.batch_decode([[tid] for tid in ids])
+
+
+def spans_problem(spans, variant, cond):
+    """None if the located spans are complete and sit where the template puts
+    them, else a short reason. The identity span must not overlap the item
+    text and must be on the right side of it."""
+    demo, instr, txt = spans
+    if not _span_ok(instr) or txt is None:
+        return "instruction or item text not found"
+    if cond != "baseline" and demo is None:
+        return "demographic not found"
+    covered = [set(range(s, e + 1)) for span in (demo, instr, txt) for s, e in _span_list(span)]
+    if sum(len(c) for c in covered) != len(set().union(*covered)):
+        return "segments overlap"
+    if cond == "baseline":
+        return None
+    if variant in AFTER_TEXT_VARIANTS:
+        return None if demo[0] > txt[1] else "demographic span not after the item text"
+    return None if demo[1] < txt[0] else "demographic span not before the item text"
 
 
 def n_tokens(tok, phrase):
     return len(tok(phrase, add_special_tokens=False)["input_ids"])
 
 
-MATCH_VARIANTS = STRUCTURE_VARIANTS + TARGET_VARIANTS + INFIX_VARIANTS
 _MATCH_SAMPLE_TEXT = "This is an example comment."
 
 
-def in_context_span_lengths(tok, cond_name):
-    """Token length of the demographic span as it actually sits inside each
-    MATCH_VARIANTS prompt. The phrase-based variants carry the full sentence,
-    embedded/target carry only the noun phrase, and a leading space can change
-    tokenization, so a standalone token count is not enough for exact matching.
-    The span is delimited by fixed template text, so the item text used here
-    does not affect its length."""
-    out = {}
-    for v in MATCH_VARIANTS:
-        tokens = tokenize_only(tok, build_prompt_variant(tok, v, cond_name, _MATCH_SAMPLE_TEXT))
-        demo, _, _ = locate_spans(tokens, v, cond_name)
-        out[v] = None if demo is None else demo[1] - demo[0] + 1
-    return out
+def span_length_table(tok):
+    """In-context token length of the demographic span for every (variant,
+    condition). The span is delimited by fixed template text, so the item text
+    does not affect it. Returns DataFrame indexed by condition, one column per
+    variant."""
+    rows = {}
+    for c in CONDITIONS:
+        rows[c] = {}
+        for v in VARIANTS:
+            tokens = tokenize_only(tok, build_prompt_variant(tok, v, c, _MATCH_SAMPLE_TEXT))
+            demo, _, _ = locate_spans(tokens, v, c)
+            rows[c][v] = -1 if demo is None else span_len(demo)
+    return pd.DataFrame.from_dict(rows, orient="index")[VARIANTS]
 
 
-def build_matched_conditions(tok):
-    """For each of MATCHED_DEMOGRAPHICS, pick the PLACEBO_POOL entry whose span
-    length matches the demographic's in every MATCH_VARIANTS prompt (minimum
-    total mismatch, pool order breaks ties), and register it as placebo_tok{N}
-    (N = standalone phrase token count, kept for continuity with earlier runs).
-    Returns (matched_condition_names, pairing_rows, demo_to_placebo)."""
-    pool_lengths = []
-    for i, (phrase, noun) in enumerate(PLACEBO_POOL):
-        CONDITIONS["_cand"] = (phrase, noun, "placebo", True)
-        pool_lengths.append(in_context_span_lengths(tok, "_cand"))
-    del CONDITIONS["_cand"]
-
-    matched_names, pairing, demo_to_placebo = [], [], {}
-    for demo in MATCHED_DEMOGRAPHICS:
-        demo_lens = in_context_span_lengths(tok, demo)
-
-        def mismatch(i):
-            return sum(abs(demo_lens[v] - pool_lengths[i][v]) for v in MATCH_VARIANTS)
-
-        best = min(range(len(PLACEBO_POOL)), key=mismatch)
-        phrase, noun = PLACEBO_POOL[best]
-        name = f"placebo_tok{n_tokens(tok, phrase)}"
-        if name in CONDITIONS and CONDITIONS[name][0] != phrase:
-            name = f"{name}_{best}"
-        CONDITIONS.setdefault(name, (phrase, noun, "placebo", True))
-        status = "exact" if mismatch(best) == 0 else f"MISMATCH={mismatch(best)}"
-        per_variant = ", ".join(f"{v}:{demo_lens[v]}/{pool_lengths[best][v]}" for v in MATCH_VARIANTS)
-        pairing.append((demo, name, phrase, status, per_variant))
-        matched_names.append(name)
-        demo_to_placebo[demo] = name
-    return sorted(set(matched_names)), pairing, demo_to_placebo
+def build_matching(tok):
+    """Every demographic -> the placebos whose span length equals its own in
+    EVERY variant. Aborts if a demographic has none."""
+    lengths = span_length_table(tok)
+    matches, missing = {}, []
+    for d in DEMOGRAPHICS:
+        m = [p for p in PLACEBOS if (lengths.loc[p] == lengths.loc[d]).all()]
+        matches[d] = m
+        if not m:
+            missing.append(d)
+    if missing:
+        print(lengths.to_string())
+        raise SystemExit(f"No exact-length placebo in every variant for: {missing}. "
+                         "Fix the placebo nouns before running.")
+    return matches, lengths
 
 
-def build_null_placebos():
-    """Register every PLACEBO_POOL phrase not already a condition as
-    placebo_pool{i:02d}. Run under `prefix` they give a distribution of
-    content-free effects across lengths 4-14 tokens, the null against which a
-    demographic phrase's effect (and per-head attention) is judged -- 3-5
-    placebos are too few, since content-free phrases differ a lot among
-    themselves. Call after build_matched_conditions."""
-    used = {v[0] for v in CONDITIONS.values()}
-    names = []
-    for i, (phrase, noun) in enumerate(PLACEBO_POOL):
-        if phrase in used:
-            continue
-        CONDITIONS[f"placebo_pool{i:02d}"] = (phrase, noun, "placebo", True)
-        names.append(f"placebo_pool{i:02d}")
-    return names
-
-
-def build_run_plan(matched_placebos):
-    """Deduplicated union of all blocks.
-    Returns {(variant, condition): set-of-block-names}."""
-    plan = {}
-
-    def add(variants, conditions, block):
-        for v in variants:
-            for c in conditions:
-                plan.setdefault((v, c), set()).add(block)
-
-    breadth = [c for c, (_, _, axis, _) in CONDITIONS.items()
-               if axis in ("region", "gender", "religion", "identity")
-               or c in ("placebo_short", "placebo_mid", "placebo_long")]
-    add(["prefix"], breadth, "breadth")
-    add(["suffix", "reworded", "embedded"] + TARGET_VARIANTS + INFIX_VARIANTS, STRUCTURE_CONDITIONS, "structure")
-    add(STRUCTURE_VARIANTS + TARGET_VARIANTS + INFIX_VARIANTS, MATCHED_DEMOGRAPHICS + matched_placebos, "matched")
-    add(CONTEXT_VARIANTS, CONTEXT_CONDITIONS, "context")
-    add(["prefix"], [c for c, v in CONDITIONS.items() if v[3]], "placebo_null")
-    return plan
-
-
-def tokenize_only(tok, prompt_text):
-    ids = tok(prompt_text, truncation=True, max_length=MAX_LENGTH,
-              add_special_tokens=False)["input_ids"]
-    return [tok.decode([tid]) for tid in ids]
+def build_run_plan():
+    """Full factorial: every condition under every variant."""
+    return [(v, c) for v in VARIANTS for c in CONDITIONS]
 
 
 def preflight(tok, plan, sample_texts):
-    """Tokenizer-only dry run over the whole run plan. Span-finding depends on
-    the chat template, which differs between Llama and Qwen, and a silent span
-    failure only shows up as NaN columns after the entire job has run. This
-    refuses to start the real loop instead. Costs no GPU time."""
+    """Tokenizer-only dry run over the whole plan on real item texts."""
     failures = []
-    for text in sample_texts:
-        for (variant, cond) in sorted(plan):
+    for k, (item_id, text) in enumerate(sample_texts):
+        for (variant, cond) in plan + [("prefix", "baseline")]:
             tokens = tokenize_only(tok, build_prompt_variant(tok, variant, cond, text))
-            demo, instr, txt = locate_spans(tokens, variant, cond)
-            need = [("instruction", instr), ("item_text", txt)]
-            if cond != "baseline":
-                need.append(("demographic", demo))
-            for seg_name, span in need:
-                if not _span_ok(span):
-                    failures.append((variant, cond, seg_name))
-    unique = sorted(set(failures))
-    if unique:
-        print(f"\n!!! PREFLIGHT FAILED: {len(unique)} unlocatable span(s) for {MODEL_NAME}")
-        for variant, cond, seg in unique:
-            print(f"    variant={variant:13s} condition={cond:32s} segment={seg}")
-        raise SystemExit(
-            "Aborting before any forward pass. Span-finding must be fixed for this "
-            "model's chat template first, otherwise the run produces NaN attention "
-            "columns for these combinations and the GPU time is wasted."
-        )
-    print(f"Preflight OK: all spans located for all {len(plan)} (variant, condition) "
-          f"pairs on {len(sample_texts)} sample items.")
+            why = spans_problem(locate_spans(tokens, variant, cond), variant, cond)
+            if why:
+                failures.append((item_id, variant, cond, why))
+        if (k + 1) % 100 == 0:
+            print(f"  preflight {k + 1}/{len(sample_texts)} items", flush=True)
+    if failures:
+        print(f"\n!!! PREFLIGHT FAILED: {len(failures)} prompt(s) with bad spans for {MODEL_NAME}")
+        print(pd.DataFrame(failures, columns=["item_id", "variant", "condition", "problem"])
+              .head(40).to_string(index=False))
+        raise SystemExit("Aborting before any forward pass.")
+    print(f"Preflight OK: spans located and correctly placed for all {len(plan)} (variant, condition) "
+          f"pairs + baseline on all {len(sample_texts)} item texts.")
+
+
+def load_items():
+    if not os.path.exists(ITEMS_CSV):
+        raise SystemExit(f"{ITEMS_CSV} not found: run select_items.py (score, then select) first.")
+    items = pd.read_csv(ITEMS_CSV)
+    return items.head(MAX_ITEMS) if MAX_ITEMS else items
+
+
+class DecisionHead:
+    """fp32 logits of the two answer tokens. A bf16 model also rounds its output
+    logits to bf16; at typical magnitudes (~25) that is a 0.06-0.125 step in
+    log-odds, so small framing shifts get quantized (seen on the test model:
+    16 distinct values for 60 prompts). This recomputes just the "0" and "1"
+    logits from the final hidden state in fp32. Works for batches; the last
+    position must be a real token (left padding)."""
+
+    def __init__(self, model, zero_id, one_id):
+        head = model.get_output_embeddings()
+        assert getattr(head, "bias", None) is None, "lm_head has a bias; add it here"
+        self.w = head.weight[[zero_id, one_id]].detach().float()      # (2, hidden)
+        self.h = None
+        head.register_forward_hook(lambda mod, inp, out: setattr(self, "h", inp[0][:, -1].detach()))
+
+    def logits(self):
+        """(batch, 2) fp32 logits for ["0", "1"] from the last forward pass."""
+        return self.h.float() @ self.w.T
+
+    def logodds(self):
+        l = self.logits()
+        return l[:, 1] - l[:, 0]
+
+
+class ValueNorms:
+    """Captures each layer's value projections during a forward pass and turns
+    raw attention at the decision token into value-weighted attention:
+    a_hj * ||W_O^h v_j||, renormalized per head (Kobayashi et al. 2020).
+    ||W_O^h v||^2 = v^T (W_O^h^T W_O^h) v, so the Gram matrices are precomputed
+    once and each pass costs a few small matmuls."""
+
+    def __init__(self, model):
+        cfg = model.config
+        self.n_heads = cfg.num_attention_heads
+        self.n_kv = getattr(cfg, "num_key_value_heads", self.n_heads)
+        self.head_dim = getattr(cfg, "head_dim", None) or cfg.hidden_size // self.n_heads
+        self.layers = model.model.layers
+        self.values = [None] * len(self.layers)
+        self.grams = []
+        for li, layer in enumerate(self.layers):
+            w = layer.self_attn.o_proj.weight.detach().float()          # (hidden, heads*d)
+            w = w.view(w.shape[0], self.n_heads, self.head_dim).permute(1, 2, 0)   # (heads, d, hidden)
+            self.grams.append(w @ w.transpose(1, 2))                     # (heads, d, d)
+            layer.self_attn.v_proj.register_forward_hook(self._hook(li))
+
+    def _hook(self, li):
+        def fn(module, inputs, output):
+            self.values[li] = output[0].detach()                         # (seq, kv*d)
+        return fn
+
+    def weighted(self, li, attn_last):
+        """attn_last: (heads, seq) float tensor -> (heads, seq) value-weighted shares."""
+        v = self.values[li].float().view(-1, self.n_kv, self.head_dim).permute(1, 0, 2)  # (kv, seq, d)
+        v = v.repeat_interleave(self.n_heads // self.n_kv, dim=0)                       # (heads, seq, d)
+        norms = torch.einsum("hsd,hde,hse->hs", v, self.grams[li], v).clamp_min(0).sqrt()
+        w = attn_last * norms
+        return w / w.sum(dim=1, keepdim=True).clamp_min(1e-12)
 
 
 if __name__ == "__main__":
     os.makedirs(RESULTS_DIR, exist_ok=True)
-    out_main = f"{RESULTS_DIR}/master_grid_{MODEL_TAG}.csv"
-    out_layer = f"{RESULTS_DIR}/master_grid_layerwise_{MODEL_TAG}.csv.gz"
+    out_main = f"{RESULTS_DIR}/master_grid_{MODEL_TAG}.csv.gz"
     out_head = f"{RESULTS_DIR}/master_grid_perhead_{MODEL_TAG}.npz"
-    out_items = f"{RESULTS_DIR}/master_grid_items_{MODEL_TAG}.csv"
+    out_match = f"{RESULTS_DIR}/matching_{MODEL_TAG}.csv"
+    out_noise = f"{RESULTS_DIR}/noise_{MODEL_TAG}.csv"
 
-    candidates = rank_by_entropy()
-    print(f"{len(candidates)} items in the seeded 500-item D3CODE eval sample "
-          f"(entropy {candidates.entropy.min():.3f}-{candidates.entropy.max():.3f})")
+    items = load_items()
+    print(f"{len(items)} items from {ITEMS_CSV}  split {items.split.value_counts().to_dict()}  "
+          f"categories {items.category.value_counts().to_dict()}")
 
-    print(f"\nLoading model: {MODEL_NAME}")
+    print(f"\nLoading tokenizer: {MODEL_NAME}")
     tok = AutoTokenizer.from_pretrained(MODEL_NAME)
+    matches, lengths = build_matching(tok)
+    lengths.to_csv(out_match)
+    print(f"\n=== Matched placebos (exact span length in all {len(VARIANTS)} variants) ===")
+    for d, ps in matches.items():
+        print(f"  {d:32s} {list(lengths.loc[d])}  <-> {', '.join(ps)}")
 
-    matched_placebos, pairing, demo_to_placebo = build_matched_conditions(tok)
-    print(f"\n=== Token-matched pairs (in-context span length demo/placebo per variant) ===")
-    for demo, name, pphrase, status, per_variant in pairing:
-        flag = "" if status == "exact" else "   <-- NOT EXACT in every variant"
-        print(f"  {demo:24s} <-> {name:16s} \"{pphrase}\"  [{status}]{flag}\n      {per_variant}")
-
-    build_null_placebos()
-    plan = build_run_plan(matched_placebos)
-    by_block = {}
-    for pair, blocks in plan.items():
-        for b in blocks:
-            by_block.setdefault(b, []).append(pair)
-    print(f"\n=== Run plan: {len(plan)} unique (variant, condition) pairs ===")
-    for b in ["breadth", "structure", "matched", "context", "placebo_null"]:
-        print(f"  {b:10s} {len(by_block.get(b, []))} pairs")
-
-    preflight(tok, plan, candidates["text"].head(3).tolist())
+    plan = build_run_plan()
+    print(f"\n=== Run plan: {len(VARIANTS)} variants x {len(CONDITIONS)} conditions = {len(plan)} pairs ===")
+    preflight(tok, plan, list(zip(items["item_id"], items["text"])))
     if PREFLIGHT_ONLY:
-        print("\nPREFLIGHT_ONLY=1: imports, data, token matching and span-finding all OK. "
-              "Exiting before model load.")
+        print(f"\nPREFLIGHT_ONLY=1: OK. Span lengths written to {out_match}. Exiting before model load.")
         raise SystemExit(0)
 
-    # No device_map="auto": that needs the `accelerate` package, which isn't installed on
-    # the LRZ venv, and this is a single-GPU job anyway.
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Loading weights, then moving to {device}")
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME, dtype=torch.bfloat16, attn_implementation="eager"
-    ).to(device)
+        MODEL_NAME, dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+        attn_implementation="eager").to(device)
     model.eval()
-
+    vnorm = ValueNorms(model)
     zero_id = tok.encode("0", add_special_tokens=False)[0]
     one_id = tok.encode("1", add_special_tokens=False)[0]
+    dhead = DecisionHead(model, zero_id, one_id)
 
     def run_one(prompt_text):
-        """One deterministic forward pass. Returns per-head attention at the
-        decision token, shape (n_layers, n_heads, seq_len) -- not averaged over
-        layers/heads here, so the per-head detail survives to disk."""
+        """One deterministic forward pass. Returns P(yes), log-odds, raw and
+        value-weighted attention at the decision token (layers, heads, seq),
+        and the decoded tokens."""
         inputs = tok(prompt_text, return_tensors="pt", truncation=True,
                      max_length=MAX_LENGTH, add_special_tokens=False).to(model.device)
         out = model(**inputs, output_attentions=True)
-        logits = out.logits[0, -1]
-        predicted = "1" if logits[one_id] > logits[zero_id] else "0"
-        _, prob_one = torch.softmax(logits[[zero_id, one_id]].float(), dim=0)
-        attn_stack = torch.stack(out.attentions, dim=0)
-        attn_lh = attn_stack[:, 0, :, -1, :].float().cpu().numpy()
-        tokens = [tok.decode([t]) for t in inputs["input_ids"][0].tolist()]
-        return predicted, prob_one.item(), attn_lh, tokens
-
-    def content_chart_entry(attn, tokens, demo_span, instr_span, text_span):
-        """attn: (seq,) -- layer+head-averaged attention at the decision token.
-        Returns (tokens, weights, labels) for one condition's content-attention bar
-        chart row: sink-excluded, renormalized attention restricted to just the
-        demographic/instruction/item-text tokens."""
-        spans = [("demographic", demo_span), ("instruction", instr_span), ("item_text", text_span)]
-        content_idx = sorted({i for _, span in spans for s, e in _span_list(span) for i in range(s, e + 1)})
-        idx_to_label = {i: label for label, span in spans for s, e in _span_list(span) for i in range(s, e + 1)}
-        content_attn = np.array([attn[i] for i in content_idx])
-        content_attn_norm = content_attn / content_attn.sum() if content_attn.sum() > 0 else content_attn
-        return [tokens[i] for i in content_idx], content_attn_norm, [idx_to_label[i] for i in content_idx]
-
+        logodds = dhead.logodds()[0].item()                 # fp32, see DecisionHead
+        prob_one = 1.0 / (1.0 + np.exp(-logodds))
+        raw = torch.stack([a[0, :, -1, :].float() for a in out.attentions])          # (L, H, seq)
+        vw = torch.stack([vnorm.weighted(li, raw[li]) for li in range(raw.shape[0])])
+        tokens = tok.batch_decode([[t] for t in inputs["input_ids"][0].tolist()])
+        return prob_one, logodds, raw.cpu().numpy(), vw.cpu().numpy(), tokens
 
     def segment_attention(attn_lh, demo_span, instr_span, text_span):
-        """attn_lh: (n_layers, n_heads, seq) -> (n_layers, n_heads, 4).
-        'other' is the remainder: attention sink plus chat-template scaffolding.
-        Each of demo_span/instr_span/text_span may be a single (start,end) tuple,
-        None, or (instr_span only, for "target") a list of tuples -- summed via
-        _span_list() so a segment split across disjoint fragments still totals
-        correctly."""
+        """(layers, heads, seq) -> (layers, heads, 4); 'other' = sink + scaffolding
+        (+ the shared elaboration in the context variants)."""
         n_layers, n_heads, _ = attn_lh.shape
         seg = np.zeros((n_layers, n_heads, 4), dtype=np.float32)
         for k, span in enumerate([demo_span, instr_span, text_span]):
@@ -552,211 +457,193 @@ if __name__ == "__main__":
         seg[:, :, 3] = 1.0 - seg[:, :, :3].sum(axis=2)
         return seg
 
-    # --- stage 1: baseline pass over the whole seeded sample ----------------
-    # Every item gets a baseline row, including the ones that later fall out of
-    # band, so the table can still report baseline behaviour on the full 500.
-    print(f"\n=== Stage 1: baseline pass over all {len(candidates)} items ===")
-    result_rows, layer_rows, head_blocks, head_index = [], [], [], []
-    baselines = {}
+    def content_chart_entry(attn, tokens, demo_span, instr_span, text_span):
+        spans = [("demographic", demo_span), ("instruction", instr_span), ("item_text", text_span)]
+        idx_to_label = {i: label for label, span in spans for s, e in _span_list(span)
+                        for i in range(s, e + 1)}
+        content_idx = sorted(idx_to_label)
+        w = np.array([attn[i] for i in content_idx])
+        w = w / w.sum() if w.sum() > 0 else w
+        return [tokens[i] for i in content_idx], w, [idx_to_label[i] for i in content_idx]
 
-    def span_len(span):
-        return sum(e - s + 1 for s, e in _span_list(span))
+    result_rows, head_raw, head_vw, head_index = [], [], [], []
 
-    def record(item, variant, cond_name, blocks, predicted, prob_yes,
-               b_pred, b_prob, seg, ok, spans, seq_len):
+    def summarize(seg):
+        d, i_, t, o = [float(x) for x in seg.mean(axis=(0, 1))]
+        content = 1.0 - o
+        norm = (lambda x: x / content) if content > 0 else (lambda x: np.nan)
+        return d, i_, t, o, norm(d), norm(i_), norm(t)
+
+    def record(item, variant, cond, prob, logodds, base, seg_raw, seg_vw, spans, seq_len):
         demo_span, instr_span, text_span = spans
-        if ok:
-            per_layer = seg.mean(axis=1)
-            d, i_, t, o = [float(x) for x in per_layer.mean(axis=0)]
-        else:
-            per_layer = None
-            d = i_ = t = o = np.nan
-        content = 1.0 - o if not np.isnan(o) else np.nan
-        has = isinstance(content, float) and content > 0
-        phrase, noun, axis, is_placebo = (
-            CONDITIONS[cond_name] if cond_name != "baseline" else ("", "", "baseline", False))
-        result_rows.append({
-            "model": MODEL_TAG, "item_id": item["item_id"], "category": item["category"],
+        noun_, axis, is_placebo = CONDITIONS[cond] if cond != "baseline" else ("", "baseline", False)
+        phrase = phrase_of(variant, cond)
+        row = {
+            "model": MODEL_TAG, "item_id": item["item_id"], "split": item["split"],
+            "category": item["category"], "sub_category": item["sub_category"],
             "entropy": item["entropy"], "variance": item["variance"],
             "p_offensive_raters": item["p_offensive"], "n_raters": item["n_raters"],
-            "block": "|".join(sorted(blocks)), "variant": variant, "condition": cond_name,
-            "matched_placebo": demo_to_placebo.get(cond_name, ""),
-            "axis": axis, "is_placebo": is_placebo,
-            "phrase": phrase, "phrase_words": len(phrase.split()) if phrase else 0,
+            "variant": variant, "condition": cond, "axis": axis, "is_placebo": is_placebo,
+            "noun": noun_, "phrase": phrase,
+            "matched_placebos": "|".join(matches.get(cond, [])),
             "phrase_tokens": n_tokens(tok, phrase) if phrase else 0,
-            # token counts of the spans as actually located in the full prompt; can
-            # differ from phrase_tokens when a leading space or neighbour merges
-            "demo_span_tokens": span_len(demo_span),
-            "instr_span_tokens": span_len(instr_span),
-            "text_span_tokens": span_len(text_span),
-            "seq_len": seq_len,
-            "predicted": predicted, "prob_yes": prob_yes,
-            "baseline_pred": b_pred, "baseline_prob_yes": b_prob,
-            "flipped_vs_baseline": predicted != b_pred,
-            "delta_prob_yes": prob_yes - b_prob,
-            "pct_demographic": d, "pct_instruction": i_, "pct_item_text": t,
-            "pct_other_scaffolding": o,
-            "pct_demographic_norm": d / content if has else np.nan,
-            "pct_instruction_norm": i_ / content if has else np.nan,
-            "pct_item_text_norm": t / content if has else np.nan,
-        })
-        if per_layer is not None:
-            for li in range(per_layer.shape[0]):
-                a, b_, c_, e = [float(x) for x in per_layer[li]]
-                layer_rows.append({
-                    "model": MODEL_TAG, "item_id": item["item_id"], "variant": variant,
-                    "condition": cond_name, "layer": li, "pct_demographic": a,
-                    "pct_instruction": b_, "pct_item_text": c_, "pct_other_scaffolding": e,
-                })
-            head_blocks.append(seg.astype(np.float16))
-            head_index.append((item["item_id"], variant, cond_name,
-                               span_len(demo_span), span_len(instr_span),
-                               span_len(text_span), seq_len))
+            "demo_span_tokens": span_len(demo_span), "instr_span_tokens": span_len(instr_span),
+            "text_span_tokens": span_len(text_span), "seq_len": seq_len,
+            "predicted": int(logodds > 0), "prob_yes": prob, "logodds_yes": logodds,
+            "baseline_pred": int(base[1] > 0), "baseline_prob_yes": base[0],
+            "baseline_logodds_yes": base[1],
+            "flipped_vs_baseline": int(logodds > 0) != int(base[1] > 0),
+            "delta_prob_yes": prob - base[0], "delta_logodds_yes": logodds - base[1],
+        }
+        for tag, seg in (("", seg_raw), ("_vw", seg_vw)):
+            d, i_, t, o, dn, in_, tn = summarize(seg)
+            row.update({f"pct_demographic{tag}": d, f"pct_instruction{tag}": i_,
+                        f"pct_item_text{tag}": t, f"pct_other_scaffolding{tag}": o,
+                        f"pct_demographic_norm{tag}": dn, f"pct_instruction_norm{tag}": in_,
+                        f"pct_item_text_norm{tag}": tn})
+        result_rows.append(row)
+        head_raw.append(seg_raw.astype(np.float16))
+        head_vw.append(seg_vw.astype(np.float16))
+        head_index.append((item["item_id"], variant, cond, span_len(demo_span),
+                           span_len(instr_span), span_len(text_span), seq_len))
 
+    def run_pair(item, variant, cond, base):
+        prompt = build_prompt_variant(tok, variant, cond, item["text"])
+        prob, logodds, raw, vw, tokens = run_one(prompt)
+        spans = locate_spans(tokens, variant, cond)
+        why = spans_problem(spans, variant, cond)
+        if why:
+            raise SystemExit(f"item {item['item_id']} {variant} {cond}: {why}. Stopping instead "
+                             "of writing wrong attention values.")
+        return prob, logodds, raw, vw, tokens, spans
+
+    # --- stage 1: baselines --------------------------------------------------
+    print(f"\n=== Stage 1: baseline pass over {len(items)} items ===")
+    baselines = {}
+    t_start = time.time()
     with torch.no_grad():
-        for i, (_, item) in enumerate(candidates.iterrows()):
-            prompt = build_prompt_variant(tok, "prefix", "baseline", item["text"])
-            pred, prob, attn_lh, tokens = run_one(prompt)
-            _, instr, txt = locate_spans(tokens, "prefix", "baseline")
-            ok = _span_ok(instr) and txt is not None
-            seg = segment_attention(attn_lh, None, instr, txt) if ok else None
-            record(item, "all", "baseline", {"baseline"}, pred, prob, pred, prob, seg, ok,
-                   (None, instr, txt), len(tokens))
-            baselines[item["item_id"]] = (pred, prob)
-            if (i + 1) % 100 == 0:
-                print(f"  {i + 1}/{len(candidates)}", flush=True)
+        for i, item in items.iterrows():
+            prob, logodds, raw, vw, tokens, spans = run_pair(item, "prefix", "baseline", None)
+            baselines[item["item_id"]] = (prob, logodds)
+            record(item, "none", "baseline", prob, logodds, (prob, logodds),
+                   segment_attention(raw, *spans), segment_attention(vw, *spans), spans, len(tokens))
+    print(f"  done in {(time.time() - t_start) / 60:.1f} min")
 
-    bprob = pd.Series({k: v[1] for k, v in baselines.items()})
-    in_band_ids = bprob[(bprob >= MIN_BASELINE_PROB) & (bprob <= MAX_BASELINE_PROB)].index
-    items = candidates[candidates.item_id.isin(set(in_band_ids))].reset_index(drop=True)
-    if MAX_ITEMS:
-        items = items.head(MAX_ITEMS)
-    print(f"\n{len(items)} of {len(candidates)} items have baseline P(yes) in "
-          f"[{MIN_BASELINE_PROB}, {MAX_BASELINE_PROB}] -- these carry the condition grid.")
-    print(f"  entropy in selected set: {items.entropy.min():.3f}-{items.entropy.max():.3f} "
-          f"(NOT filtered on, recorded as a covariate)")
-    print(f"  categories: {items['category'].value_counts().to_dict()}")
-    items.to_csv(out_items, index=False)
-
-    # top-N by entropy WITHIN the in-band set (not the full 500) -- has to be
-    # recomputed per model, since a fixed item list wouldn't survive Qwen's much
-    # stricter in-band filter (64 of 500 items here, vs 236 for Llama)
+    # illustrative items: top-N by rating entropy in the shared list, so both
+    # models chart the same items
     illustrative = items.sort_values("entropy", ascending=False).head(N_ILLUSTRATIVE)
-    print(f"\nIllustrative items for charts (top {N_ILLUSTRATIVE} by entropy, in-band): "
-          f"{illustrative['item_id'].tolist()}")
-    # item_id -> variant -> condition -> (tokens, weights, labels)
     chart_data = {}
     with torch.no_grad():
         for _, item in illustrative.iterrows():
-            prompt = build_prompt_variant(tok, "prefix", "baseline", item["text"])
-            _, _, attn_lh, tokens = run_one(prompt)
-            _, instr, txt = locate_spans(tokens, "prefix", "baseline")
-            if not (_span_ok(instr) and txt is not None):
-                continue
-            entry = content_chart_entry(attn_lh.mean(axis=(0, 1)), tokens, None, instr, txt)
+            _, _, raw, _, tokens, spans = run_pair(item, "prefix", "baseline", None)
+            entry = content_chart_entry(raw.mean(axis=(0, 1)), tokens, *spans)
             chart_data[item["item_id"]] = {v: {"baseline": entry} for v in CHART_VARIANTS}
 
-    # --- stage 2: the condition grid ---------------------------------------
-    grid_pairs = sorted(p for p in plan if p[1] != "baseline")
-    n_total = len(items) * len(grid_pairs)
-    print(f"\n=== Stage 2: {len(grid_pairs)} pairs x {len(items)} items = "
-          f"{n_total} forward passes ===")
-    n_done = 0
-    t_start = time.time()
+    # --- stage 2: the full grid ---------------------------------------------
+    n_total = len(items) * len(plan)
+    print(f"\n=== Stage 2: {len(plan)} pairs x {len(items)} items = {n_total} forward passes ===")
+    n_done, t_start = 0, time.time()
     with torch.no_grad():
         for _, item in items.iterrows():
-            b_pred, b_prob = baselines[item["item_id"]]
-            for (variant, cond) in grid_pairs:
-                prompt = build_prompt_variant(tok, variant, cond, item["text"])
-                pred, prob, attn_lh, tokens = run_one(prompt)
-                demo, instr, txt = locate_spans(tokens, variant, cond)
-                ok = demo is not None and _span_ok(instr) and txt is not None
-                seg = segment_attention(attn_lh, demo, instr, txt) if ok else None
-                record(item, variant, cond, plan[(variant, cond)], pred, prob,
-                       b_pred, b_prob, seg, ok, (demo, instr, txt), len(tokens))
-                if ok and item["item_id"] in chart_data and variant in CHART_VARIANTS and cond in CHART_CONDITIONS:
+            base = baselines[item["item_id"]]
+            for (variant, cond) in plan:
+                prob, logodds, raw, vw, tokens, spans = run_pair(item, variant, cond, base)
+                record(item, variant, cond, prob, logodds, base,
+                       segment_attention(raw, *spans), segment_attention(vw, *spans), spans, len(tokens))
+                if item["item_id"] in chart_data and variant in CHART_VARIANTS and cond in CHART_CONDITIONS:
                     chart_data[item["item_id"]][variant][cond] = content_chart_entry(
-                        attn_lh.mean(axis=(0, 1)), tokens, demo, instr, txt)
+                        raw.mean(axis=(0, 1)), tokens, *spans)
                 n_done += 1
-                if n_done % 500 == 0:
+                if n_done % 1000 == 0:
                     el = time.time() - t_start
                     rate = n_done / el
-                    print(f"  {n_done}/{n_total}  elapsed {el/60:.1f} min  "
-                          f"{rate:.2f} passes/s  ETA {(n_total - n_done)/rate/60:.1f} min", flush=True)
+                    print(f"  {n_done}/{n_total}  elapsed {el / 60:.1f} min  {rate:.1f} passes/s  "
+                          f"ETA {(n_total - n_done) / rate / 60:.1f} min", flush=True)
                 if n_done % CHECKPOINT_EVERY == 0:
                     pd.DataFrame(result_rows).to_csv(out_main + ".partial", index=False)
 
     results_df = pd.DataFrame(result_rows)
-    results_df.to_csv(out_main, index=False)
+    results_df.to_csv(out_main, index=False, compression="gzip")
     if os.path.exists(out_main + ".partial"):
         os.remove(out_main + ".partial")
     print(f"\nSaved {out_main}  ({len(results_df)} rows)")
 
-    pd.DataFrame(layer_rows).to_csv(out_layer, index=False, compression="gzip")
-    print(f"Saved {out_layer}  ({len(layer_rows)} rows)")
-
-    head_arr = np.stack(head_blocks, axis=0)
-    idx = pd.DataFrame(head_index, columns=["item_id", "variant", "condition",
-                                            "demo_span_tokens", "instr_span_tokens",
-                                            "text_span_tokens", "seq_len"])
+    idx = pd.DataFrame(head_index, columns=["item_id", "variant", "condition", "demo_span_tokens",
+                                            "instr_span_tokens", "text_span_tokens", "seq_len"])
+    head_raw_arr, head_vw_arr = np.stack(head_raw), np.stack(head_vw)
     np.savez_compressed(
-        out_head, attention=head_arr, item_id=idx["item_id"].to_numpy(dtype=np.int64),
-        # explicit numpy unicode: pandas >= 3 string columns otherwise end up as
-        # object arrays, which np.load refuses without allow_pickle
+        out_head, attention=head_raw_arr, attention_vw=head_vw_arr,
+        item_id=idx["item_id"].to_numpy(dtype=np.int64),
         variant=np.asarray(idx["variant"].tolist(), dtype=str),
         condition=np.asarray(idx["condition"].tolist(), dtype=str),
         demo_span_tokens=idx["demo_span_tokens"].to_numpy(dtype=np.int32),
         instr_span_tokens=idx["instr_span_tokens"].to_numpy(dtype=np.int32),
         text_span_tokens=idx["text_span_tokens"].to_numpy(dtype=np.int32),
-        seq_len=idx["seq_len"].to_numpy(dtype=np.int32),
-        segments=np.array(SEGMENTS))
-    print(f"Saved {out_head}  shape={head_arr.shape} (rows, layers, heads, segments), float16")
+        seq_len=idx["seq_len"].to_numpy(dtype=np.int32), segments=np.array(SEGMENTS))
+    print(f"Saved {out_head}  shape={head_raw_arr.shape} x2 (raw, value-weighted), float16")
 
-    bad = results_df[results_df["pct_other_scaffolding"].isna()]
-    print(f"\nRows with unfound span: {len(bad)} (preflight should have made this 0)")
-    if len(bad):
-        print(bad[["item_id", "variant", "condition"]].drop_duplicates().to_string(index=False))
+    # --- output sanity checks -------------------------------------------------
+    expected = len(items) * (len(plan) + 1)
+    seg_sum = head_raw_arr[..., :3].astype(np.float32).sum(-1)
+    print(f"\n=== Sanity checks ===")
+    print(f"  rows {len(results_df)} (expected {expected}) -> {'OK' if len(results_df) == expected else 'MISMATCH'}")
+    print(f"  NaN in attention columns: {int(results_df.filter(like='pct_').isna().sum().sum())}")
+    print(f"  per-head content share in [0, 1]: min {seg_sum.min():.4f} max {seg_sum.max():.4f}")
+    span_diff = results_df[results_df.condition != "baseline"].groupby(["variant", "condition"]) \
+        ["demo_span_tokens"].nunique()
+    print(f"  (variant, condition) pairs whose span length varies across items: {(span_diff > 1).sum()}")
+
+    # --- noise check ----------------------------------------------------------
+    if NOISE_ITEMS:
+        print(f"\n=== Noise check: first {NOISE_ITEMS} items again ===")
+        ref = results_df.set_index(["item_id", "variant", "condition"])
+        noise = []
+        with torch.no_grad():
+            for _, item in items.head(NOISE_ITEMS).iterrows():
+                for (variant, cond) in [("none", "baseline")] + plan:
+                    v = "prefix" if cond == "baseline" else variant
+                    prob, logodds, *_ = run_pair(item, v, cond, None)
+                    r = ref.loc[(item["item_id"], variant, cond)]
+                    noise.append({"item_id": item["item_id"], "variant": variant, "condition": cond,
+                                  "d_prob": prob - r["prob_yes"], "d_logodds": logodds - r["logodds_yes"]})
+        noise = pd.DataFrame(noise)
+        score_path = f"{SCORES_DIR}/scores_{MODEL_TAG}.csv"
+        if os.path.exists(score_path):
+            sc = pd.read_csv(score_path).set_index("item_id")
+            b = results_df[results_df.condition == "baseline"].set_index("item_id")
+            d = b["prob_yes"] - sc.loc[b.index, "prob_yes"]
+            print(f"  grid baseline vs select_items score (no output_attentions): "
+                  f"max |dP| {d.abs().max():.2e}, mean |dP| {d.abs().mean():.2e}")
+        noise.to_csv(out_noise, index=False)
+        print(f"  identical input run twice: max |dP| {noise.d_prob.abs().max():.2e}, "
+              f"max |d logodds| {noise.d_logodds.abs().max():.2e}  ({len(noise)} passes) -> {out_noise}")
 
     grid = results_df[results_df.condition != "baseline"]
-    print("\n=== Mean signed delta P(yes), prefix structure, all conditions ===")
-    pref = grid[grid.variant == "prefix"].groupby(["axis", "condition"])["delta_prob_yes"]
-    print(pref.agg(["mean", "count"]).round(4).sort_values("mean", ascending=False).to_string())
+    pd.set_option("display.width", 250)
+    print("\n=== Mean signed delta P(yes) by condition x variant ===")
+    print(grid.pivot_table(index="condition", columns="variant", values="delta_prob_yes")
+          .round(3)[VARIANTS].to_string())
 
-    print("\n=== Mean signed delta P(yes) by variant x condition ===")
-    print(grid.groupby(["variant", "condition"])["delta_prob_yes"].mean().unstack().round(3).to_string())
-
-    print("\n=== Mean sink-excluded demographic attention by variant x condition ===")
-    print(grid.groupby(["variant", "condition"])["pct_demographic_norm"].mean().unstack().round(4).to_string())
-
-    # --- illustrative content-attention charts: prefix vs infix vs suffix ---
-    # Same phrase per condition across all three positions (verified locally to
-    # tokenize to an identical length in each -- see conversation), so any
-    # difference in the bars below is a position effect, not a length effect.
+    # --- illustrative content-attention charts: prefix vs infix vs suffix -----
     charts_dir = f"{FIGURES_DIR}/content_attention_charts"
     os.makedirs(charts_dir, exist_ok=True)
-    row_order = ["baseline"] + CHART_CONDITIONS
     n_saved = 0
     for item_id, per_variant in chart_data.items():
         for variant in CHART_VARIANTS:
-            conds_present = [c for c in row_order if c in per_variant[variant]]
-            if not conds_present:
-                continue
+            conds_present = [c for c in ["baseline"] + CHART_CONDITIONS if c in per_variant[variant]]
             fig, axes = plt.subplots(len(conds_present), 1, figsize=(12, 3 * len(conds_present)), squeeze=False)
             for ax, cond_name in zip(axes[:, 0], conds_present):
                 toks, weights, labels = per_variant[variant][cond_name]
-                colors = [SEGMENT_COLORS[l] for l in labels]
-                ax.bar(range(len(toks)), weights, color=colors)
+                ax.bar(range(len(toks)), weights, color=[SEGMENT_COLORS[l] for l in labels])
                 ax.set_xticks(range(len(toks)))
                 ax.set_xticklabels([t.strip() or "·" for t in toks], rotation=60, ha="right", fontsize=8)
                 ax.set_title(cond_name)
                 ax.set_ylabel("attention\n(sink excluded, renorm.)")
             handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in SEGMENT_COLORS.values()]
             fig.legend(handles, SEGMENT_COLORS.keys(), loc="upper right")
-            fig.suptitle(f"model={MODEL_TAG}  item_id={item_id}  variant={variant}  "
-                         f"(same phrase, position-only comparison)")
+            fig.suptitle(f"model={MODEL_TAG}  item_id={item_id}  variant={variant}")
             fig.tight_layout()
-            fig.savefig(f"{charts_dir}/item{item_id}_{variant}.png", dpi=150)
+            fig.savefig(f"{charts_dir}/{MODEL_TAG}_item{item_id}_{variant}.png", dpi=150)
             plt.close(fig)
             n_saved += 1
-    print(f"\nSaved {n_saved} illustrative content-attention charts "
-          f"({len(chart_data)} items x {len(CHART_VARIANTS)} variants) to {charts_dir}/")
+    print(f"\nSaved {n_saved} illustrative charts to {charts_dir}/")

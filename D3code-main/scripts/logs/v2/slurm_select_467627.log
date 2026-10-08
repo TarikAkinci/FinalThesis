@@ -1,0 +1,84 @@
+name, memory.total [MiB], driver_version
+NVIDIA H200 NVL, 143771 MiB, 610.57.04
+GPU OK: NVIDIA H200 NVL, compute capability 9.0, python 3.12.15, torch 2.14.1+cu130, transformers 5.14.1
+===== stage: check  (2026-10-07 17:20:03) =====
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+meta-llama/Llama-3.1-8B-Instruct: every demographic has an exact-length placebo in all 10 variants
+Qwen/Qwen2.5-7B-Instruct: every demographic has an exact-length placebo in all 10 variants
+
+Demographic span length per variant (meta-llama/Llama-3.1-8B-Instruct):
+                               prefix  reworded  imagine  consider  infix  suffix  embedded  target  context  context_long
+region_western_europe               7         9        8         9      7       7         4       4        7             7
+region_north_america                7         9        8         9      7       7         4       4        7             7
+region_latin_america                7         9        8         9      7       7         4       4        7             7
+region_arab_culture                 9        11       10        11      9       9         6       6        9             9
+region_indian_cultural_sphere       9        11       10        11      9       9         6       6        9             9
+region_sinosphere                   9        11       10        11      9       9         6       6        9             9
+region_sub_saharan_africa           9        11       10        11      9       9         6       6        9             9
+region_oceania                      8        10        9        10      8       8         5       5        8             8
+gender_man                          5         7        6         7      5       5         2       2        5             5
+gender_woman                        5         7        6         7      5       5         2       2        5             5
+religion_christian                  5         7        6         7      5       5         2       2        5             5
+religion_muslim                     5         7        6         7      5       5         2       2        5             5
+identity_arab                       5         7        6         7      5       5         2       2        5             5
+identity_european                   5         7        6         7      5       5         2       2        5             5
+placebo_runner                      5         7        6         7      5       5         2       2        5             5
+placebo_cyclist                     5         7        6         7      5       5         2       2        5             5
+placebo_early_riser                 7         9        8         9      7       7         4       4        7             7
+placebo_chess                       7         9        8         9      7       7         4       4        7             7
+placebo_maps                        8        10        9        10      8       8         5       5        8             8
+placebo_crossword                   8        10        9        10      8       8         5       5        8             8
+placebo_stairs                      9        11       10        11      9       9         6       6        9             9
+placebo_tea                         9        11       10        11      9       9         6       6        9             9
+
+OK: all 220 (condition, variant) span lengths are identical across 2 models.
+===== stage: score  (2026-10-07 17:20:12) =====
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+4519 pool items (unique text, >= 10 raters)
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:  19%|█▉        | 55/291 [00:00<00:00, 546.87it/s]Loading weights:  40%|███▉      | 116/291 [00:00<00:00, 564.74it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 1201.84it/s]
+  500/4519
+  1000/4519
+  1500/4519
+  2000/4519
+  2500/4519
+  3000/4519
+  3500/4519
+  4000/4519
+  4500/4519
+wrote results/v2/scores/scores_Llama-3-1-8B-Instruct.csv: 2034 of 4519 items in band for Llama-3-1-8B-Instruct
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+4519 pool items (unique text, >= 10 raters)
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights:  20%|██        | 69/339 [00:00<00:00, 613.64it/s]Loading weights:  39%|███▊      | 131/339 [00:00<00:00, 613.36it/s]Loading weights: 100%|██████████| 339/339 [00:00<00:00, 1562.88it/s]
+  500/4519
+  1000/4519
+  1500/4519
+  2000/4519
+  2500/4519
+  3000/4519
+  3500/4519
+  4000/4519
+  4500/4519
+wrote results/v2/scores/scores_Qwen2-5-7B-Instruct.csv: 670 of 4519 items in band for Qwen2-5-7B-Instruct
+===== stage: select  (2026-10-07 17:23:00) =====
+models: ['Llama-3-1-8B-Instruct', 'Qwen2-5-7B-Instruct']
+  in band for Llama-3-1-8B-Instruct: 2034
+  in band for Qwen2-5-7B-Instruct: 670
+  in band for all: 554 of 4519
+
+wrote items/items_v2.csv: N=400  split {'B': 200, 'A': 200}
+              pool_share  eligible  selected   A   B
+category                                            
+moral              0.097       100        51  26  25
+random             0.376       301       196  98  98
+social-group       0.526       153       153  76  77
+
+selection bias check (pool vs selected):
+  mean human offensive fraction  0.339 vs 0.213
+  mean rating entropy            1.770 vs 1.508
+  mean baseline P(yes) Llama-3-1-8B-Instruct: 0.471
+  mean baseline P(yes) Qwen2-5-7B-Instruct: 0.520
+===== done (2026-10-07 17:23:01) =====

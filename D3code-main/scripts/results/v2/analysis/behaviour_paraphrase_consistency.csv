@@ -1,0 +1,13 @@
+model,template_1,template_2,rho_condition_means,rho_identity_specific
+Llama-3-1-8B-Instruct,prefix,reworded,0.9830604178430267,0.9868131868131869
+Llama-3-1-8B-Instruct,prefix,imagine,0.9887069452286844,0.9824175824175824
+Llama-3-1-8B-Instruct,prefix,consider,0.9830604178430267,0.9428571428571428
+Llama-3-1-8B-Instruct,reworded,imagine,0.9785431959345003,0.9604395604395607
+Llama-3-1-8B-Instruct,reworded,consider,0.9830604178430267,0.9120879120879121
+Llama-3-1-8B-Instruct,imagine,consider,0.9887069452286844,0.9604395604395607
+Qwen2-5-7B-Instruct,prefix,reworded,0.9311123658949747,0.9076923076923077
+Qwen2-5-7B-Instruct,prefix,imagine,0.9153020892151329,0.9208791208791209
+Qwen2-5-7B-Instruct,prefix,consider,0.8972332015810277,0.8681318681318682
+Qwen2-5-7B-Instruct,reworded,imagine,0.909655561829475,0.8593406593406594
+Qwen2-5-7B-Instruct,reworded,consider,0.9311123658949747,0.9472527472527472
+Qwen2-5-7B-Instruct,imagine,consider,0.9198193111236591,0.8285714285714285

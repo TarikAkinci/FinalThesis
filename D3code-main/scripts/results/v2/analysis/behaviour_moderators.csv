@@ -1,0 +1,27 @@
+model,outcome,covariate,spearman,p,mean,n
+Llama-3-1-8B-Instruct,identity_specific,entropy,0.03302876583535096,0.4611842390066008,,
+Llama-3-1-8B-Instruct,any_phrase_shift,entropy,0.0010154943285631852,0.9819292076969974,,
+Llama-3-1-8B-Instruct,identity_specific,p_offensive_raters,0.0056165075880699415,0.9003053829101597,,
+Llama-3-1-8B-Instruct,any_phrase_shift,p_offensive_raters,0.017578157522421436,0.6949798447024957,,
+Llama-3-1-8B-Instruct,identity_specific,baseline_logodds_yes,-0.15892335569342275,0.00036048957316882433,,
+Llama-3-1-8B-Instruct,any_phrase_shift,baseline_logodds_yes,-0.6314825579302317,5.401649696684944e-57,,
+Llama-3-1-8B-Instruct,identity_specific,category=moral,,,1.3353029193859252,72.0
+Llama-3-1-8B-Instruct,any_phrase_shift,category=moral,,,0.427909395158893,72.0
+Llama-3-1-8B-Instruct,identity_specific,category=random,,,1.34571276782395,275.0
+Llama-3-1-8B-Instruct,any_phrase_shift,category=random,,,0.5057854083352837,275.0
+Llama-3-1-8B-Instruct,identity_specific,category=social-group,,,1.1968711751237524,153.0
+Llama-3-1-8B-Instruct,any_phrase_shift,category=social-group,,,0.5130713984715536,153.0
+Llama-3-1-8B-Instruct,identity_specific,category (Kruskal),,0.06665885673709662,,
+Qwen2-5-7B-Instruct,identity_specific,entropy,0.08333543134661574,0.06260127576896761,,
+Qwen2-5-7B-Instruct,any_phrase_shift,entropy,0.164533745374711,0.00021980853089159034,,
+Qwen2-5-7B-Instruct,identity_specific,p_offensive_raters,0.029655837909441096,0.5082208759607744,,
+Qwen2-5-7B-Instruct,any_phrase_shift,p_offensive_raters,0.13639137280946284,0.0022396335258105904,,
+Qwen2-5-7B-Instruct,identity_specific,baseline_logodds_yes,0.13266926667706672,0.0029557872833277077,,
+Qwen2-5-7B-Instruct,any_phrase_shift,baseline_logodds_yes,-0.056375745502982,0.2082305544513677,,
+Qwen2-5-7B-Instruct,identity_specific,category=moral,,,3.0464390044411025,72.0
+Qwen2-5-7B-Instruct,any_phrase_shift,category=moral,,,3.7918759503147816,72.0
+Qwen2-5-7B-Instruct,identity_specific,category=random,,,3.0023563836456892,275.0
+Qwen2-5-7B-Instruct,any_phrase_shift,category=random,,,3.8807027432150094,275.0
+Qwen2-5-7B-Instruct,identity_specific,category=social-group,,,2.2226755139317946,153.0
+Qwen2-5-7B-Instruct,any_phrase_shift,category=social-group,,,4.5487355093692505,153.0
+Qwen2-5-7B-Instruct,identity_specific,category (Kruskal),,0.018592191371269887,,

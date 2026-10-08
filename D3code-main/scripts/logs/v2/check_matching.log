@@ -1,0 +1,32 @@
+torch native triton_utils op overrides disabled
+torch native cutedsl_utils op overrides disabled
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+meta-llama/Llama-3.1-8B-Instruct: every demographic has an exact-length placebo in all 10 variants
+Qwen/Qwen2.5-7B-Instruct: every demographic has an exact-length placebo in all 10 variants
+
+Demographic span length per variant (meta-llama/Llama-3.1-8B-Instruct):
+                               prefix  reworded  imagine  consider  infix  suffix  embedded  target  context  context_long
+region_western_europe               7         9        8         9      7       7         4       4        7             7
+region_north_america                7         9        8         9      7       7         4       4        7             7
+region_latin_america                7         9        8         9      7       7         4       4        7             7
+region_arab_culture                 9        11       10        11      9       9         6       6        9             9
+region_indian_cultural_sphere       9        11       10        11      9       9         6       6        9             9
+region_sinosphere                   9        11       10        11      9       9         6       6        9             9
+region_sub_saharan_africa           9        11       10        11      9       9         6       6        9             9
+region_oceania                      8        10        9        10      8       8         5       5        8             8
+gender_man                          5         7        6         7      5       5         2       2        5             5
+gender_woman                        5         7        6         7      5       5         2       2        5             5
+religion_christian                  5         7        6         7      5       5         2       2        5             5
+religion_muslim                     5         7        6         7      5       5         2       2        5             5
+identity_arab                       5         7        6         7      5       5         2       2        5             5
+identity_european                   5         7        6         7      5       5         2       2        5             5
+placebo_runner                      5         7        6         7      5       5         2       2        5             5
+placebo_cyclist                     5         7        6         7      5       5         2       2        5             5
+placebo_early_riser                 7         9        8         9      7       7         4       4        7             7
+placebo_chess                       7         9        8         9      7       7         4       4        7             7
+placebo_maps                        8        10        9        10      8       8         5       5        8             8
+placebo_crossword                   8        10        9        10      8       8         5       5        8             8
+placebo_stairs                      9        11       10        11      9       9         6       6        9             9
+placebo_tea                         9        11       10        11      9       9         6       6        9             9
+
+OK: all 220 (condition, variant) span lengths are identical across 2 models.

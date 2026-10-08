@@ -1,0 +1,23 @@
+what,scope,n,spearman
+condition_means,all variants,220,0.674204763809921
+condition_means,consider,22,0.5403726708074535
+condition_means,context,22,0.5844155844155845
+condition_means,context_long,22,0.5968379446640317
+condition_means,embedded,22,0.549407114624506
+condition_means,imagine,22,0.663466967814794
+condition_means,infix,22,0.6837944664031621
+condition_means,prefix,22,0.6939582156973463
+condition_means,reworded,22,0.637492941840768
+condition_means,suffix,22,-0.3359683794466404
+condition_means,target,22,0.875776397515528
+identity_specific,all variants,140,0.46750344405326816
+identity_specific,consider,14,0.42857142857142855
+identity_specific,context,14,0.5120879120879122
+identity_specific,context_long,14,0.37142857142857144
+identity_specific,embedded,14,0.5648351648351648
+identity_specific,imagine,14,0.46373626373626364
+identity_specific,infix,14,0.7362637362637363
+identity_specific,prefix,14,0.49890109890109896
+identity_specific,reworded,14,0.38461538461538464
+identity_specific,suffix,14,0.26593406593406593
+identity_specific,target,14,0.7626373626373627

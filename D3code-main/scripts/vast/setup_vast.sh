@@ -1,21 +1,21 @@
 #!/bin/bash
-# One-time setup on a fresh vast.ai GPU instance (use a PyTorch template/image).
+# One-time setup on a fresh vast.ai GPU instance (PyTorch template).
 #
 #   git clone https://github.com/TarikAkinci/FinalThesis.git && cd FinalThesis
-#   export HF_TOKEN=hf_...      # Hugging Face token of the account that has Llama 3.1 access
+#   hf auth login          # you paste your Hugging Face token; needs Llama 3.1 access
 #   bash D3code-main/scripts/vast/setup_vast.sh
 #
-# Installs the Python deps, checks that torch actually has kernels for this GPU
-# (the LRZ V100 failure: "no kernel image is available"), and downloads both
-# models (~31 GB; the duplicate original/ checkpoint of Llama is skipped).
+# Installs the Python deps (transformers pinned to the version the local tests
+# ran with, so chat templates and the attention hook behave the same), checks
+# that torch has working kernels for this GPU (the LRZ V100 failure), and
+# downloads both models (~31 GB; Llama's duplicate original/ checkpoint skipped).
 set -euo pipefail
 cd "$(dirname "$0")/.."            # D3code-main/scripts
-mkdir -p results logs
 
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
 
 python -c "import torch" 2>/dev/null || pip install -q torch
-pip install -q "transformers>=5" pandas scipy matplotlib huggingface_hub
+pip install -q "transformers==5.14.1" "huggingface_hub>=1.0" pandas scipy statsmodels matplotlib
 
 python - <<'EOF'
 import torch
@@ -29,19 +29,9 @@ x = emb(torch.arange(10, device="cuda"))
 print(f"GPU OK: {name}, compute capability {cap[0]}.{cap[1]}, torch {torch.__version__}")
 EOF
 
-if [ -z "${HF_TOKEN:-}" ]; then
-    echo "HF_TOKEN is not set: export it (needed for the gated Llama model) and rerun." >&2
-    exit 1
-fi
+hf auth whoami >/dev/null 2>&1 || { echo "Not logged in to Hugging Face: run 'hf auth login' first." >&2; exit 1; }
 hf download meta-llama/Llama-3.1-8B-Instruct --exclude "original/*"
 hf download Qwen/Qwen2.5-7B-Instruct
 
-python - <<'EOF' | tee logs/env_versions.txt
-import platform, torch, transformers, pandas, numpy, scipy
-print("python", platform.python_version())
-for m in (torch, transformers, pandas, numpy, scipy):
-    print(m.__name__, m.__version__)
-print("gpu", torch.cuda.get_device_name(0))
-EOF
 df -h . | tail -1
-echo "Setup done. Next: bash vast/run_pipeline.sh"
+echo "Setup done. Next:  tmux new -s grid   then   bash vast/run_pipeline.sh"
