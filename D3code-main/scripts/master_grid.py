@@ -127,9 +127,35 @@ CONDITIONS = {
     # placebo in v1 and "tea over coffee" may read as a cultural cue, so check it
     # separately before pooling it with the others.
     "placebo_tea": ("someone who prefers tea over coffee", "placebo", True),
+    # v3 place-name controls: the exact region name, but with a relation that says
+    # nothing about belonging ("researching" / "mapping" a region instead of being
+    # "from" it). Same tokens for the place, same span length as the region phrase
+    # in every variant under both tokenizers. They separate "the model reacts to
+    # an identity" from "the model reacts to a capitalised place name". Only the 4
+    # v3 regions. Axis "placebo_place": NOT used as length-matched partners (that
+    # stays the 8 content-free placebos, as in v2), and run as a separate subset
+    # (ONLY_CONDITIONS) so the v2 grid files stay untouched.
+    "place_researching_western_europe": ("someone researching Western Europe", "placebo_place", True),
+    "place_mapping_western_europe": ("someone mapping Western Europe", "placebo_place", True),
+    "place_researching_latin_america": ("someone researching Latin America", "placebo_place", True),
+    "place_mapping_latin_america": ("someone mapping Latin America", "placebo_place", True),
+    "place_researching_arab_culture": ("someone researching the Arab Culture region", "placebo_place", True),
+    "place_mapping_arab_culture": ("someone mapping the Arab Culture region", "placebo_place", True),
+    "place_researching_sub_saharan_africa": ("someone researching Sub Saharan Africa", "placebo_place", True),
+    "place_mapping_sub_saharan_africa": ("someone mapping Sub Saharan Africa", "placebo_place", True),
 }
 DEMOGRAPHICS = [c for c, v in CONDITIONS.items() if not v[2]]
-PLACEBOS = [c for c, v in CONDITIONS.items() if v[2]]
+PLACEBOS = [c for c, v in CONDITIONS.items() if v[1] == "placebo"]          # content-free, length partners
+PLACE_CONTROLS = [c for c, v in CONDITIONS.items() if v[1] == "placebo_place"]
+# region condition -> its two place-name controls
+PLACE_CONTROL_OF = {f"region_{c.split('_', 2)[2]}": [p for p in PLACE_CONTROLS if p.endswith(c.split('_', 2)[2])]
+                    for c in PLACE_CONTROLS}
+# v2 grid = demographics + content-free placebos; the place controls are a separate run
+V2_CONDITIONS = DEMOGRAPHICS + PLACEBOS
+# subset run (e.g. the place controls) with its own output suffix, so it never
+# overwrites the main grid files
+ONLY_CONDITIONS = [c for c in os.environ.get("ONLY_CONDITIONS", "").split(",") if c]
+OUT_SUFFIX = os.environ.get("OUT_SUFFIX", "")
 
 SENTENCE_TEMPLATES = {          # identity sentence per variant
     "prefix": "You are {n}.", "reworded": "Assume you are {n}.",
@@ -305,8 +331,13 @@ def build_matching(tok):
 
 
 def build_run_plan():
-    """Full factorial: every condition under every variant."""
-    return [(v, c) for v in VARIANTS for c in CONDITIONS]
+    """Full factorial: every condition under every variant (the v2 set, or
+    ONLY_CONDITIONS when given)."""
+    conds = ONLY_CONDITIONS or V2_CONDITIONS
+    unknown = [c for c in conds if c not in CONDITIONS]
+    if unknown:
+        raise SystemExit(f"Unknown conditions in ONLY_CONDITIONS: {unknown}")
+    return [(v, c) for v in VARIANTS for c in conds]
 
 
 def preflight(tok, plan, sample_texts):
@@ -397,10 +428,12 @@ class ValueNorms:
 
 if __name__ == "__main__":
     os.makedirs(RESULTS_DIR, exist_ok=True)
-    out_main = f"{RESULTS_DIR}/master_grid_{MODEL_TAG}.csv.gz"
-    out_head = f"{RESULTS_DIR}/master_grid_perhead_{MODEL_TAG}.npz"
-    out_match = f"{RESULTS_DIR}/matching_{MODEL_TAG}.csv"
-    out_noise = f"{RESULTS_DIR}/noise_{MODEL_TAG}.csv"
+    out_main = f"{RESULTS_DIR}/master_grid_{MODEL_TAG}{OUT_SUFFIX}.csv.gz"
+    out_head = f"{RESULTS_DIR}/master_grid_perhead_{MODEL_TAG}{OUT_SUFFIX}.npz"
+    out_match = f"{RESULTS_DIR}/matching_{MODEL_TAG}{OUT_SUFFIX}.csv"
+    out_noise = f"{RESULTS_DIR}/noise_{MODEL_TAG}{OUT_SUFFIX}.csv"
+    if ONLY_CONDITIONS and not OUT_SUFFIX:
+        raise SystemExit("ONLY_CONDITIONS needs an OUT_SUFFIX, so the subset run cannot overwrite the main grid.")
 
     items = load_items()
     print(f"{len(items)} items from {ITEMS_CSV}  split {items.split.value_counts().to_dict()}  "
@@ -415,7 +448,7 @@ if __name__ == "__main__":
         print(f"  {d:32s} {list(lengths.loc[d])}  <-> {', '.join(ps)}")
 
     plan = build_run_plan()
-    print(f"\n=== Run plan: {len(VARIANTS)} variants x {len(CONDITIONS)} conditions = {len(plan)} pairs ===")
+    print(f"\n=== Run plan: {len(VARIANTS)} variants x {len(plan) // len(VARIANTS)} conditions = {len(plan)} pairs ===")
     preflight(tok, plan, list(zip(items["item_id"], items["text"])))
     if PREFLIGHT_ONLY:
         print(f"\nPREFLIGHT_ONLY=1: OK. Span lengths written to {out_match}. Exiting before model load.")
@@ -531,7 +564,8 @@ if __name__ == "__main__":
 
     # illustrative items: top-N by rating entropy in the shared list, so both
     # models chart the same items
-    illustrative = items.sort_values("entropy", ascending=False).head(N_ILLUSTRATIVE)
+    # (no charts in a subset run: the chart conditions are not in it)
+    illustrative = items.sort_values("entropy", ascending=False).head(0 if ONLY_CONDITIONS else N_ILLUSTRATIVE)
     chart_data = {}
     with torch.no_grad():
         for _, item in illustrative.iterrows():

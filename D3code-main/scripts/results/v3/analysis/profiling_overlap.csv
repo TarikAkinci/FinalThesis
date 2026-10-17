@@ -1,0 +1,19 @@
+model,what,spearman,overlap,chance
+Llama-3-1-8B-Instruct,identity_specific prefix vs infix,0.4659645232815965,,
+Llama-3-1-8B-Instruct,identity_specific prefix vs target,0.3317384195515342,,
+Llama-3-1-8B-Instruct,identity_specific infix vs target,0.26314211027465845,,
+Llama-3-1-8B-Instruct,top-34 profiling (prefix) vs step-1 candidates,,6.0,1.12890625
+Llama-3-1-8B-Instruct,profiling |identity_specific| (prefix) vs step-1 |content t| (non-sink heads),0.2539558387590711,,
+Llama-3-1-8B-Instruct,top-34 profiling (infix) vs step-1 candidates,,2.0,1.12890625
+Llama-3-1-8B-Instruct,profiling |identity_specific| (infix) vs step-1 |content t| (non-sink heads),0.22118739177532049,,
+Llama-3-1-8B-Instruct,top-34 profiling (target) vs step-1 candidates,,2.0,1.12890625
+Llama-3-1-8B-Instruct,profiling |identity_specific| (target) vs step-1 |content t| (non-sink heads),0.16685320035778117,,
+Qwen2-5-7B-Instruct,identity_specific prefix vs infix,0.44916545763429544,,
+Qwen2-5-7B-Instruct,identity_specific prefix vs target,0.15112129358387175,,
+Qwen2-5-7B-Instruct,identity_specific infix vs target,0.22294063035563652,,
+Qwen2-5-7B-Instruct,top-108 profiling (prefix) vs step-1 candidates,,27.0,14.877551020408163
+Qwen2-5-7B-Instruct,profiling |identity_specific| (prefix) vs step-1 |content t| (non-sink heads),0.18224005339773458,,
+Qwen2-5-7B-Instruct,top-108 profiling (infix) vs step-1 candidates,,26.0,14.877551020408163
+Qwen2-5-7B-Instruct,profiling |identity_specific| (infix) vs step-1 |content t| (non-sink heads),0.16507325191148184,,
+Qwen2-5-7B-Instruct,top-108 profiling (target) vs step-1 candidates,,17.0,14.877551020408163
+Qwen2-5-7B-Instruct,profiling |identity_specific| (target) vs step-1 |content t| (non-sink heads),0.06592194504595102,,

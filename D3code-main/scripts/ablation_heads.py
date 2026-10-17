@@ -61,7 +61,9 @@ import master_grid as mg
 
 STATE = {"heads": {}, "span": None, "bias": 0.0, "scope": "last"}
 # the four demographics the v1 results hinged on, one per axis and length class
-DEFAULT_CONDITIONS = ["gender_woman", "religion_muslim", "region_western_europe", "region_arab_culture"]
+# v3: the four focus regions (decision of 8 Oct 2026)
+DEFAULT_CONDITIONS = ["region_sub_saharan_africa", "region_arab_culture",
+                      "region_western_europe", "region_latin_america"]
 
 
 def _wrap(orig):
@@ -135,22 +137,23 @@ def random_head_sets(candidates, n_heads, n_sets, seed=0):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--candidates", help="perhead_candidates_<MODEL>.csv")
+    ap.add_argument("--candidates", help="perhead_v3_candidates_<MODEL>_raw.csv (ranked, frozen in step 1)")
     ap.add_argument("--heads", help='explicit "layer:head,..." or "all" (overrides --candidates)')
     ap.add_argument("--layers", default="", help='restrict to a layer range, e.g. "10-20"')
     ap.add_argument("--top-k", type=int, default=10)
     ap.add_argument("--allow-failed", action="store_true",
                     help="use top-k heads even if none passed the candidate criteria")
     ap.add_argument("--n-random", type=int, default=10)
-    ap.add_argument("--alphas", default="0,0.5,2,4")
-    ap.add_argument("--variants", default="prefix")
+    ap.add_argument("--alphas", default="0,2,4")
+    ap.add_argument("--variants", default="prefix,infix,target")
     ap.add_argument("--conditions", default=",".join(DEFAULT_CONDITIONS),
-                    help="demographics; their exact-length placebos are added automatically")
+                    help="demographics; their exact-length placebos and place-name controls are added automatically")
     ap.add_argument("--items", default=mg.ITEMS_CSV, help="shared v2 item list")
     ap.add_argument("--split", default="B", help="A, B, or all")
     ap.add_argument("--max-items", type=int, default=0)
     ap.add_argument("--scope", choices=["last", "all"], default="last")
-    ap.add_argument("--out-dir", default="results/ablation")
+    ap.add_argument("--out-dir", default="results/v3/ablation")
+    ap.add_argument("--label", default="", help="output name suffix; default <candidates|all_heads>_<scope>")
     a = ap.parse_args()
 
     model_name = os.environ.get("MODEL_NAME", mg.MODEL_NAME)
@@ -167,6 +170,8 @@ def main():
         cand = parse_heads(a.heads)
     else:
         c = pd.read_csv(a.candidates)
+        if "passes" not in c.columns:                       # v3 step-1 format
+            c["passes"] = c["candidate"]
         if not c["passes"].any() and not a.allow_failed:
             raise SystemExit("No head passed the candidate criteria. That is itself the result; rerun "
                              "with --allow-failed to test the top-k anyway (as an exploratory check).")
@@ -178,7 +183,9 @@ def main():
 
     matches, _ = mg.build_matching(tok)
     demos = [c for c in a.conditions.split(",") if c]
-    conds = list(dict.fromkeys(demos + [p for d in demos for p in matches[d]]))
+    places = {d: mg.PLACE_CONTROL_OF.get(d, []) for d in demos}
+    conds = list(dict.fromkeys(demos + [p for d in demos for p in matches[d]]
+                               + [p for d in demos for p in places[d]]))
     items = pd.read_csv(a.items)
     if a.split != "all":
         items = items[items.split == a.split]
@@ -269,6 +276,8 @@ def main():
                         rows.append({"model": tag, "item_id": item["item_id"], "split": item["split"],
                                      "variant": variant, "condition": cond,
                                      "is_placebo": bool(mg.CONDITIONS[cond][2]),
+                                     "axis": mg.CONDITIONS[cond][1],
+                                     "human_label": int(item["p_offensive"] >= 0.5),
                                      "matched_placebos": "|".join(matches.get(cond, [])),
                                      "head_set": set_name, "alpha": alpha, "scope": a.scope,
                                      "n_heads": len(hs), "prob_baseline": p_base,
@@ -284,12 +293,18 @@ def main():
     df["delta_full"] = df.prob_full - df.prob_baseline
     df["change"] = df.prob_int - df.prob_full
     df["change_logodds"] = df.logodds_int - df.logodds_full
-    df.to_csv(f"{a.out_dir}/ablation_{tag}.csv", index=False)
+    # side effect on the task itself: agreement with the human majority label
+    df["correct_full"] = (df.prob_full > 0.5).astype(int) == df.human_label
+    df["correct_int"] = (df.prob_int > 0.5).astype(int) == df.human_label
+    label = a.label or f"{'all_heads' if a.heads == 'all' else 'candidates'}_{a.scope}"
+    tag_out = f"{tag}_{label}"
+    df.to_csv(f"{a.out_dir}/ablation_{tag_out}.csv.gz", index=False, compression="gzip")
 
     summ = (df.groupby(["variant", "condition", "is_placebo", "head_set", "alpha"])
             .agg(n=("item_id", "size"), delta_full=("delta_full", "mean"), change=("change", "mean"),
                  change_logodds=("change_logodds", "mean"), kl_mean=("kl_full_to_int", "mean"),
-                 kl_max=("kl_full_to_int", "max"))
+                 kl_max=("kl_full_to_int", "max"),
+                 acc_full=("correct_full", "mean"), acc_int=("correct_int", "mean"))
             .reset_index())
     summ["frac_of_framing_shift_undone"] = -summ.change / summ.delta_full
 
@@ -302,10 +317,19 @@ def main():
             if len(m) < 5:
                 continue
             diff = m.change_d - m.change_p
-            spec.append({"variant": variant, "head_set": set_name, "alpha": alpha, "condition": demo,
-                         "placebos": "|".join(matches[demo]), "n": len(m),
-                         "identity_specific_change": diff.mean(),
-                         "p": stats.wilcoxon(diff)[1] if (diff != 0).any() else np.nan})
+            row = {"variant": variant, "head_set": set_name, "alpha": alpha, "condition": demo,
+                   "placebos": "|".join(matches[demo]), "n": len(m),
+                   "identity_specific_change": diff.mean(),
+                   "p": stats.wilcoxon(diff)[1] if (diff != 0).any() else np.nan}
+            # same contrast against the place-name controls ("researching / mapping X"):
+            # what the intervention does to the identity beyond the place name itself
+            if places[demo]:
+                q = x[x.condition.isin(places[demo])].groupby("item_id", as_index=False)["change"].mean()
+                mq = d.merge(q, on="item_id", suffixes=("_d", "_q"))
+                dq = mq.change_d - mq.change_q
+                row.update({"place_controls": "|".join(places[demo]), "place_specific_change": dq.mean(),
+                            "p_place": stats.wilcoxon(dq)[1] if (dq != 0).any() else np.nan})
+            spec.append(row)
     spec = pd.DataFrame(spec)
     # where do the candidates fall in the random-set distribution? (two-sided
     # empirical rank of |identity-specific change|; with 10 random sets the
@@ -318,14 +342,19 @@ def main():
             if c.empty or r.empty:
                 continue
             c = c.iloc[0]
-            rank.append({"variant": variant, "alpha": alpha, "condition": cond, "candidates": c,
-                         "random_mean": r.mean(), "random_min": r.min(), "random_max": r.max(),
-                         "n_random": len(r),
-                         "p_empirical": (1 + (r.abs() >= abs(c)).sum()) / (1 + len(r))})
+            row = {"variant": variant, "alpha": alpha, "condition": cond, "candidates": c,
+                   "random_mean": r.mean(), "random_min": r.min(), "random_max": r.max(),
+                   "n_random": len(r), "p_empirical": (1 + (r.abs() >= abs(c)).sum()) / (1 + len(r))}
+            if "place_specific_change" in g.columns:
+                cq = g[g.head_set == "candidates"].place_specific_change.iloc[0]
+                rq = g[g.head_set.str.startswith("random")].place_specific_change
+                row.update({"candidates_place": cq, "random_mean_place": rq.mean(),
+                            "p_empirical_place": (1 + (rq.abs() >= abs(cq)).sum()) / (1 + len(rq))})
+            rank.append(row)
     rank = pd.DataFrame(rank)
-    rank.to_csv(f"{a.out_dir}/ablation_vs_random_{tag}.csv", index=False)
-    summ.to_csv(f"{a.out_dir}/ablation_summary_{tag}.csv", index=False)
-    spec.to_csv(f"{a.out_dir}/ablation_identity_specific_{tag}.csv", index=False)
+    rank.to_csv(f"{a.out_dir}/ablation_vs_random_{tag_out}.csv", index=False)
+    summ.to_csv(f"{a.out_dir}/ablation_summary_{tag_out}.csv", index=False)
+    spec.to_csv(f"{a.out_dir}/ablation_identity_specific_{tag_out}.csv", index=False)
 
     pd.set_option("display.width", 220)
     print("\n=== Mean change in P(yes) from the intervention (candidates vs random head sets) ===")
@@ -338,7 +367,7 @@ def main():
     if not rank.empty:
         print("\n=== Candidates vs random head sets (identity-specific change) ===")
         print(rank.round(4).to_string(index=False))
-    print(f"\nwrote ablation_{{,summary_,identity_specific_,vs_random_}}{tag}.csv to {a.out_dir}")
+    print(f"\nwrote ablation_{{,summary_,identity_specific_,vs_random_}}{tag_out}.csv to {a.out_dir}")
 
 
 if __name__ == "__main__":
