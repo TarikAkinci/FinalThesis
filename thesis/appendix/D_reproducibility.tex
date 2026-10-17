@@ -1,0 +1,21 @@
+% =====================================================================
+%  Appendix D: reproducibility
+%  Sources: CLAUDE.md sections 5, 6 and 12; reports/coma_runbook_v2.md.
+% =====================================================================
+\section{Reproducibility}
+\label{app:repro}
+
+\paragraph{Compute.} \fillin{COMA cluster, NVIDIA H200, GPU hours per run (A, B, C).}
+
+\paragraph{Software.} Python 3.12, PyTorch 2.14.1 (CUDA 13), Transformers 5.14.1.
+\fillin{Model revisions / commit hashes from the HF cache.}
+
+\paragraph{Code and data.} \fillin{Repository link; which script produces which table
+(CLAUDE.md section 5).}
+
+\paragraph{Determinism.} Repeated runs give identical outputs (noise check: 0);
+batched and single runs differ by up to about 0.5 log-odds because of bf16 and padding,
+so steered and unsteered prompts are always compared within the same batch.
+
+\paragraph{Use of AI assistants.} \fillin{State how AI tools were used (code, analysis,
+writing), as required by your examination regulations.}

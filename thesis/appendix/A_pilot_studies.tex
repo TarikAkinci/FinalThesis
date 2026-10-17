@@ -1,0 +1,48 @@
+% =====================================================================
+%  Appendix A: pilot studies (v1)
+%  Sources: reports/attention_probing_final_report.md,
+%  reports/attention_layer_analysis.md, reports/disagreement_*.md,
+%  reports/master_table_full_analysis.md, reports/zeroshot_results.md,
+%  reports/literature_comparison_report.md. History in CLAUDE.md section 4
+%  (phases 1-3). Their numbers are superseded by v2; present them as the
+%  studies that shaped the final design.
+% =====================================================================
+\section{Pilot Studies}
+\label{app:pilots}
+
+\subsection{Zero-shot baseline on the seeded sample}
+% generate() + parsing, 500 seeded test-split items; D3CODE and MHS;
+% over-flagging (Llama F1 0.39, 83% predicted positive vs 20% true).
+% Decide whether MHS stays (CLAUDE.md section 10).
+\fillin{Zero-shot pilot.}
+
+\subsection{Attention probing and placebo pilots}
+% 30-item probing (7 conditions): ~80% sink, content attention 87%
+% instruction / 13% text, demographic effect in layers 9-18 (peak 13).
+% 6 / 100 / 500-item disagreement and placebo studies: ceiling effect,
+% single placebo pushing the other way (signed vs unsigned shifts).
+\fillin{Probing and placebo pilots.}
+
+\subsection{Master grid v1 and what changed}
+% LRZ block design with per-model item sets (Llama 236, Qwen 64).
+% Problems fixed in v2 (table below).
+\fillin{v1 grid.}
+
+\begin{table}[h]
+  \centering
+  \small
+  \caption{Lessons from the pilots and the design change each one led to.}
+  \label{tab:lessons}
+  \begin{tabularx}{\linewidth}{XX}
+    \toprule
+    pilot observation & change in the final design \\
+    \midrule
+    effects shrink for texts near $\pyes=0$ or 1 (ceiling)  & baseline band $[0.02, 0.98]$ for both models \\
+    a single placebo behaved oddly                          & pool of 8 placebos, 2 per length \\
+    phrase length drives attention and shifts               & exact token matching; length-adjusted null \\
+    different item sets per model                           & one shared list of 500 texts \\
+    bf16 output logits round \pyes{}                        & fp32 decision logits \\
+    identity phrase found inside the item text              & span search from the end, overlap check \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

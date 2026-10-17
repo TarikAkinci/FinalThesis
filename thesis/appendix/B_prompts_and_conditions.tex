@@ -1,0 +1,50 @@
+% =====================================================================
+%  Appendix B: exact prompts and conditions
+%  Source of truth: S/master_grid.py (build_content, CONDITIONS,
+%  SENTENCE_TEMPLATES, ELABORATION, PERSPECTIVE). Copy strings from there.
+% =====================================================================
+\section{Prompts and Conditions}
+\label{app:prompts}
+
+All prompts are wrapped in each model's chat template as a single user turn.
+\fillin{System prompt? (check: none / default of the chat template).}
+
+\noindent\textbf{Unframed.}
+\begin{promptbox}
+Text: "\{text\}"\\
+Is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\noindent\textbf{\variant{prefix} (example: \cond{someone from Western Europe}).}
+\begin{promptbox}
+You are someone from Western Europe. Text: "\{text\}"\\
+Is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\noindent\textbf{\variant{infix}.}
+\begin{promptbox}
+Text: "\{text\}"\\
+You are someone from Western Europe. Is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\noindent\textbf{\variant{embedded}.}
+\begin{promptbox}
+Text: "\{text\}"\\
+As someone from Western Europe, is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\noindent\textbf{\variant{target}.}
+\begin{promptbox}
+Text: "\{text\}"\\
+Do you think this text is offensive for someone from Western Europe? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\noindent\textbf{\variant{context\_long}.}
+\begin{promptbox}
+You are someone from Western Europe. Your background and everyday experience shape how you read
+things. Answer from that perspective. Text: "\{text\}"\\
+Is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+
+\fillin{Add the remaining formats if wanted; add the token-length table
+(S/results/v2/master\_grid/matching\_*).}

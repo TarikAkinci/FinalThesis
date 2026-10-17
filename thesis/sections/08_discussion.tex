@@ -1,0 +1,62 @@
+% =====================================================================
+%  8 Discussion
+%  Sources: reports/v3_runC_results.md 5-6, reports/v3_identity_vs_baseline.md,
+%  CLAUDE.md section 2 (story), the "honest limits" in
+%  reports/proposal_sketch.md section 7.
+% =====================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{A model-made group effect}
+% Answer RQ1 and RQ2 together: the identity changes the answer (region),
+% partly via the place name; the change is not what real groups do.
+% Framing moves models away from every group; Llama reproduces the
+% direction of regional offsets but exaggerates them (stereotype-like?).
+\fillin{Interpretation of the behavioural results.}
+
+\subsection{Calibration is not alignment}
+% Why the supervisor's criterion can be met by a constant shift; what a
+% better criterion would need (ranking, relative alignment, flag rate,
+% soft-label metrics). The Llama dampener heads as the constructive
+% result: "removes an identity bias", not "thinks like the group".
+\fillin{Interpretation of the steering results.}
+
+\subsection{What the data can and cannot support}
+% No reliable item-level group signal in D3CODE (demographic or moral);
+% disagreement is mostly within groups. So "make the model act like
+% group X" has no item-level target here. Links: Hu & Collier (variance
+% explained < 10%), perspectivism literature.
+\fillin{Implications of the group-signal analysis.}
+
+\subsection{Implications for LLM-based moderation}
+% Over-flagging (recall 0.99, precision 0.26) as the practical issue;
+% persona prompts make it worse; threshold / calibration matters more
+% than personas; borderline texts.
+\fillin{Practical implications.}
+
+\subsection{Lessons for interpretability}
+% Attention patterns are a poor guide to causal heads (overlap barely
+% above chance); item-level significance under strong single-head
+% steering is meaningless without matched nulls; information reaches
+% the answer via intermediate tokens.
+\fillin{Methodological lessons.}
+
+\subsection{Limitations}
+\label{sec:limitations}
+% - One dataset, English only, two 7-8B open models, one prompt family,
+%   single 0/1 answer token.
+% - 500 borderline texts (band filter): results describe borderline
+%   texts, not easy ones.
+% - Small rater groups per text (>= 4): noisy group shares.
+% - Only 2 phrases for gender, religion and identity: low power.
+% - Steering strength 100 is extreme; batched bf16 noise up to ~0.5
+%   log-odds (handled by within-batch comparisons).
+% - Constant shift needs labelled data too.
+% - Place controls and steering only for 4 of 8 regions.
+\fillin{Limitations.}
+
+\subsection{Ethical considerations}
+% Persona prompting can reproduce stereotypes (Llama's exaggerated
+% regional offsets); risks of "simulating" groups; D3CODE consent and
+% licence; offensive example texts in the thesis (content warning?).
+\fillin{Ethics statement.}

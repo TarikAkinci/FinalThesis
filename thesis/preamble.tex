@@ -1,0 +1,109 @@
+% =====================================================================
+%  preamble.tex : packages, layout, macros
+%  You should rarely need to touch this file.
+% =====================================================================
+
+% ---------- draft / final switch ------------------------------------
+% \drafttrue  : TODO notes and source pointers are shown in the margin
+% \draftfalse : everything disappears, ready for submission
+\newif\ifdraft
+\drafttrue
+
+% ---------- fonts and encoding --------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}   % Times-like text and maths (as in ACL papers)
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{csquotes}
+
+% ---------- page layout ---------------------------------------------
+\usepackage[a4paper,margin=2.5cm,marginparwidth=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing                     % common for theses; use \singlespacing for paper look
+\usepackage{parskip}                % paragraphs separated by space, no indent
+\setlength{\parskip}{0.6em}
+
+% ---------- maths, tables, figures ----------------------------------
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{booktabs}               % \toprule \midrule \bottomrule
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{threeparttable}         % table notes
+\usepackage[group-separator={,},group-minimum-digits=4]{siunitx}
+\usepackage{graphicx}
+\graphicspath{{figures/}{../D3code-main/scripts/figures/}}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{float}
+\usepackage{enumitem}
+\setlist{itemsep=0.2em,topsep=0.3em}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}        % prompt boxes
+
+% ---------- bibliography (biblatex + biber, author-year) ------------
+\usepackage[backend=biber,
+            style=authoryear,
+            natbib=true,             % \citet{} = Author (Year), \citep{} = (Author, Year)
+            maxcitenames=2,
+            maxbibnames=10,
+            uniquelist=false,
+            uniquename=false,
+            dashed=false,
+            giveninits=true,
+            doi=true,url=true,eprint=true]{biblatex}
+\addbibresource{references.bib}
+\DeclareFieldFormat[article,inproceedings]{title}{#1}  % no quotes around titles
+
+% ---------- links and cross references (load last) ------------------
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}   % \cref{tab:steering} -> "Table 3"
+
+% ---------- TODO notes ----------------------------------------------
+\ifdraft
+  \usepackage[colorinlistoftodos,textsize=scriptsize]{todonotes}
+\else
+  \usepackage[disable]{todonotes}
+\fi
+
+% =====================================================================
+%  Macros
+% =====================================================================
+
+% models and data (one place to change the spelling everywhere)
+\newcommand{\llama}{Llama-3.1-8B-Instruct}
+\newcommand{\qwen}{Qwen2.5-7B-Instruct}
+\newcommand{\llamashort}{Llama}
+\newcommand{\qwenshort}{Qwen}
+\newcommand{\dthree}{D3CODE}
+
+% notation
+\newcommand{\pyes}{\ensuremath{P(\text{yes})}}
+\newcommand{\pgroup}{\ensuremath{s_g}}            % share of group g's raters saying "offensive"
+\newcommand{\lo}{\ensuremath{\operatorname{logit}}}
+\newcommand{\ie}{i.e.,\ }
+\newcommand{\eg}{e.g.,\ }
+\newcommand{\head}[2]{L#1.H#2}                     % \head{12}{8} -> L12.H8
+\newcommand{\variant}[1]{\textsf{#1}}              % \variant{prefix}
+\newcommand{\cond}[1]{\textit{#1}}                 % \cond{someone from Arab Culture}
+
+% writing aids
+%   \fillin{...}  red placeholder, stays visible in final mode so you notice it
+%   \src{...}     small grey note with the source file of a number (draft only)
+%   \todo{...}    margin TODO (draft only), \todo[inline]{...} for longer ones
+\newcommand{\fillin}[1]{\textcolor{red}{[#1]}}
+\ifdraft
+  % inline (a \marginpar would break inside tables and figures)
+  \newcommand{\src}[1]{{\par\scriptsize\color{gray}[source: \texttt{#1}]\par}}
+\else
+  \newcommand{\src}[1]{}
+\fi
+
+% placeholder for a figure that does not exist yet
+\newcommand{\placeholderfig}[2][0.85\linewidth]{%
+  \fbox{\parbox[c][5cm][c]{#1}{\centering\color{gray}\small FIGURE TO MAKE:\\#2}}}
+
+% box for showing prompts verbatim-ish
+\newtcolorbox{promptbox}[1][]{colback=gray!5,colframe=gray!50,boxrule=0.4pt,
+  arc=1pt,left=4pt,right=4pt,top=3pt,bottom=3pt,fontupper=\small\ttfamily,#1}

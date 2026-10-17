@@ -1,0 +1,109 @@
+% =====================================================================
+%  1 Introduction
+%  Paragraph plan P1 to P5 from reports/thesis_proposal.md, updated with
+%  the final results. Literature notes: reports/key_points_thesis_proposal.md
+%  and the Notion export in reports/.
+% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+% ---- P1: the problem -------------------------------------------------
+% - Offensiveness is subjective; single-label gold standards erase real
+%   variation ("disagreement is signal, not noise", Denton et al. 2021;
+%   Uma et al. 2021; Plank 2022).
+% - D3CODE (Davani et al. 2024): raters from 21 countries, 8 cultural
+%   regions, moral foundations (MFQ-2).
+% - Demographics alone explain under 10% of rating variance (Hu & Collier
+%   2024), so any group signal is small.
+\fillin{P1: offensiveness is subjective; why single labels are a problem; D3CODE.}
+\citep{denton2021whose,uma2021learning,plank2022problem,davani2024d3code,hu2024quantifying}
+
+% ---- P2: LLMs in this role -------------------------------------------
+% - LLMs are used as annotators / moderators; accurate on unanimous items,
+%   overconfident on contested ones (Lu et al. 2025).
+% - Persona prompting gives little, and more attributes can hurt
+%   (Kamruzzaman et al. 2025; Giorgi 2025; Sarumi et al. 2025); LLMs fail
+%   to predict which group finds something more harmful (Movva et al. 2024).
+% - Own evidence: both models over-flag on all 4,519 D3CODE texts
+%   (flag 79% / 85% vs 22% majority-offensive; recall 0.99, precision
+%   0.27 / 0.25, AUC 0.83 / 0.82). Source: reports/v3_identity_vs_baseline.md 5.
+%   (The proposal's "confidence 0.93 vs 0.77 on contested vs agreed
+%   thirds" is from the old seeded sample: recompute on all texts or drop,
+%   see CLAUDE.md section 10.)
+\fillin{P2: LLMs as offensiveness judges and persona prompting; what is known; our over-flagging numbers.}
+
+% ---- P3: the gap -----------------------------------------------------
+% - Prior work is behavioural: does the output change with a persona?
+%   It rarely asks how the cue is used inside the model.
+% - It rarely includes a content-free control: any inserted sentence can
+%   move a prediction (recency bias, Zhao et al. 2021; position effects,
+%   Liu et al. 2024). Phrase length matters too (our v2 result: longer
+%   placebos shift less).
+% - Interpretability tools exist (attention analysis, value-weighted
+%   attention, PASTA, activation steering) but have not been applied to
+%   demographic framing in offensiveness judgments.
+\fillin{P3: what prior work does not do: internal mechanism, content-free and length-matched controls.}
+
+% ---- P4: what we do --------------------------------------------------
+% - Two open models, the same 500 borderline D3CODE texts, 22 conditions
+%   (14 demographic, 8 length-matched placebos) x 10 prompt formats, plus
+%   8 place-name controls.
+% - Behaviour: shift in log-odds against a length-adjusted placebo null.
+% - Mechanism: per-head attention (raw and value-weighted), then causal
+%   single-head profiling with PASTA against two nulls.
+% - Steering on held-out texts: dampener / amplifier heads, steering
+%   towards the text, activation steering, random-head controls, upper
+%   bounds; success = closer to the real group's share (supervisor).
+% - Finally: is there any group signal in D3CODE to align with?
+\fillin{P4: our approach in one paragraph.}
+
+% ---- RQs ---------------------------------------------------------------
+% Current wording (CLAUDE.md section 2). Proposal wording for reference:
+%   RQ1 Is the effect of a demographic framing distinguishable from the
+%       effect of any inserted sentence of matched length?
+%   RQ2 Where does the framing register (layers, heads), and does attention
+%       to it predict the behavioural shift?
+%   RQ3 Can steering toward the perspective tokens make the model's
+%       judgments track the framed group's real ratings better than plain
+%       prompting?
+We address three research questions:
+\begin{description}[leftmargin=1.2cm,style=nextline]
+  \item[RQ1] Do LLMs change their offensiveness judgments when given a
+    demographic identity, beyond what content-free phrases of the same
+    length do?
+  \item[RQ2] Do these changes match how real members of those groups judge
+    the same texts?
+  \item[RQ3] Where in the model does the identity effect arise, and can
+    attention steering control it and bring the model closer to the real
+    group ratings?
+\end{description}
+
+% ---- P5: contributions and outline -------------------------------------
+% Candidate contributions (from the proposal, updated):
+%  1. A controlled protocol for evaluating demographic prompting:
+%     shared items for both models, a baseline band against ceiling
+%     effects, exact token-length matching, a placebo pool with a
+%     length-adjusted null, place-name controls, phrase as the
+%     statistical unit.
+%  2. Behavioural findings: only region carries content; half of it (Llama)
+%     or all of it (Qwen, perspective formats) is the place name; framing
+%     moves models away from real raters.
+%  3. Mechanistic findings: a handful of middle-layer heads carry the
+%     effect causally; it reaches the answer via intermediate tokens;
+%     attention-pattern selection agrees poorly with causal selection.
+%  4. A steering evaluation that separates alignment from calibration
+%     (constant-shift baseline, ranking, flag rate).
+%  5. A reliability analysis showing D3CODE has almost no item-level group
+%     signal (demographic or moral), only small average offsets.
+Our contributions are:
+\begin{enumerate}
+  \item \fillin{Protocol contribution.}
+  \item \fillin{Behavioural finding.}
+  \item \fillin{Mechanistic finding.}
+  \item \fillin{Steering finding.}
+  \item \fillin{Data / group-signal finding.}
+\end{enumerate}
+
+\fillin{Outline: \cref{sec:related} reviews \ldots, \cref{sec:method} describes \ldots,
+\cref{sec:behaviour,sec:mechanism,sec:steering,sec:groupsignal} report \ldots,
+\cref{sec:discussion} discusses \ldots}

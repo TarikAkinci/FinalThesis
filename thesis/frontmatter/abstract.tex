@@ -1,0 +1,41 @@
+% ---------------------------------------------------------------------
+%  Abstract (150 to 250 words). Write it last.
+%  Five moves, one or two sentences each (same order as the proposal):
+%   1. Context: offensiveness is subjective; groups and cultures disagree;
+%      single labels erase this.
+%   2. Problem / gap: LLMs are used as annotators and given personas, but
+%      it is unclear whether the persona changes what the model does
+%      internally or only its output; prior work lacks content-free
+%      controls.
+%   3. What we do: D3CODE (8 regions), Llama-3.1-8B-Instruct and
+%      Qwen2.5-7B-Instruct; 22 conditions x 10 prompt formats x 500 texts;
+%      length-matched placebos and place-name controls; per-head attention;
+%      causal head profiling (PASTA); attention and activation steering.
+%   4. Findings (current numbers, CLAUDE.md section 9):
+%      - only region framing beats same-length placebos (+1.6 / +2.8
+%        log-odds); gender and religion do not;
+%      - Llama: about half the region effect is identity, half the place
+%        name; Qwen (perspective formats): the place name;
+%      - framing moves both models AWAY from the real groups
+%        (distance 0.35 -> 0.51, 0.40 -> 0.68);
+%      - a few middle-layer heads carry the effect causally; steering them
+%        halves the distance (0.50 -> 0.22), but a constant shift does as
+%        well (0.19); no method creates group-specific alignment;
+%      - D3CODE groups differ only by small average offsets, not text by
+%        text (split-half agreement about 0).
+%   5. Implication: demographic prompting injects a model-made group
+%      effect; steering can switch it off but cannot create alignment
+%      where the data has no group-specific signal.
+%
+%  The proposal's draft abstract claimed the placebo pushes the opposite
+%  way to real framings. That was a v1 pilot result with one placebo and
+%  does not hold in v2 (Qwen placebos push towards "offensive").
+% ---------------------------------------------------------------------
+\begin{abstract}
+\noindent
+\fillin{Context.}
+\fillin{Problem and gap.}
+\fillin{What we do: data, models, design, methods.}
+\fillin{Main findings, with two or three numbers.}
+\fillin{Implication.}
+\end{abstract}

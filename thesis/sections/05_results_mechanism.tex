@@ -1,0 +1,108 @@
+% =====================================================================
+%  5 Results II: where the effect arises (RQ3, first half)
+%  Sources: reports/v3_step1_explained.md (per-head, correlational),
+%  reports/v3_runB_results.md 2-3 (profiling, frozen heads),
+%  reports/v3_runC_results.md 4 (upper bounds = information flow),
+%  pilot layer profile: reports/attention_layer_analysis.md (v1).
+%  Tables: S/results/v2/analysis/perhead_v3_*, S/results/v3/analysis/profiling_*,
+%  heads_*.
+% =====================================================================
+\section{Results II: Where the Identity Effect Arises}
+\label{sec:mechanism}
+
+% ---------------------------------------------------------------------
+\subsection{Where attention goes}
+\label{sec:mechanism:attention}
+% - Sink share (~80% in pilots: recompute from v2 npz, CLAUDE.md 10).
+% - Sink heads: 302 / 1,024 (Llama), 104 / 784 (Qwen).
+% - Content attention: mostly instruction, little item text (pilot
+%   87% / 13%: recompute).
+% - Phrase takes share from the instruction, not the item text (pilot).
+\fillin{Descriptive attention picture at the decision position.}
+
+\begin{figure}[t]
+  \centering
+  \placeholderfig{Layer profile of attention to the identity phrase (per token, sink
+    excluded), both models, \variant{prefix}; maybe with the profiling heads marked.}
+  \caption{\fillin{Caption.}}
+  \label{fig:layer-profile}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{Correlational head candidates}
+\label{sec:mechanism:candidates}
+% - Content test vs the placebo length line; partial Spearman with the
+%   behavioural shift, controlling item-text length and baseline (the
+%   raw correlation was inflated by text length: 468 heads).
+% - Candidates: 34 (Llama, peak layer 14), 108 (Qwen).
+\fillin{Step-1 results and the length confound.}
+\src{v3\_step1\_explained.md}
+
+% ---------------------------------------------------------------------
+\subsection{Causal head profiling}
+\label{sec:mechanism:profiling}
+% - Reliability: split-half 0.82 to 0.96.
+% - Item-level significance useless (724 / 1,024 heads), hence the two nulls.
+% - Few heads pass, middle layers; single-head effects 1 to 2.5 log-odds.
+% - Dampeners vs amplifiers.
+% - Formats agree only partly (prefix-infix 0.45; target 0.15 to 0.33).
+% - Overlap with correlational candidates barely above chance (Llama
+%   6 / 34, chance ~1; Qwen 27 / 108, chance ~15).
+\fillin{Profiling results.}
+
+\begin{table}[t]
+  \centering
+  \caption{Heads whose region effect under single-head steering exceeds the 99th percentile of
+    both the placebo-pair and the place-pair null.}
+  \label{tab:profiling}
+  \src{v3\_runB\_results.md §2}
+  \begin{tabular}{lccc}
+    \toprule
+            & \variant{prefix} & \variant{infix} & \variant{target} \\
+    \midrule
+    \llamashort{} (1,024 heads) & 7 & 2 & 1 \\
+    \qwenshort{} (784 heads)    & 4 & 6 & 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \caption{Head sets frozen on split A for steering (layer.head, ranked by effect size).}
+  \label{tab:heads}
+  \src{results/v3/analysis/heads\_*.csv}
+  \begin{tabular}{lll}
+    \toprule
+    model & dampeners & amplifiers \\
+    \midrule
+    \llamashort & 12.8, 12.6, 11.23, 8.26, 11.25 & 13.30, 13.4 \\
+    \qwenshort  & 14.10, 13.24, 6.0              & 14.24, 13.3, 13.14, 17.18 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{How the identity reaches the answer}
+\label{sec:mechanism:flow}
+% Upper bounds (run C): removing identity attention at the answer
+% position only removes 5-19% (Llama) / ~0% (Qwen); at all positions
+% 89-98% (Llama), 94% (Qwen prefix). Information is absorbed into
+% intermediate tokens first; this is why steering must act at all
+% positions (as PASTA does).
+\fillin{Information-flow result.}
+
+\begin{table}[t]
+  \centering
+  \caption{Share of the region effect removed when attention to the identity phrase is removed in
+    all heads.}
+  \label{tab:upper-bounds}
+  \src{v3\_runC\_results.md §4}
+  \begin{tabular}{lcc}
+    \toprule
+                                 & \llamashort & \qwenshort \\
+    \midrule
+    at the answer position only  & 5--19\%  & $\approx$0\% \\
+    at all positions             & 89--98\% & 94\% (\variant{prefix}) \\
+    \bottomrule
+  \end{tabular}
+\end{table}

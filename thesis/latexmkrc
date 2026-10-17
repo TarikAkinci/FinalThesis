@@ -1,0 +1,4 @@
+# latexmk settings: pdflatex + biber, all output into build/
+$pdf_mode = 1;
+$out_dir = 'build';
+$bibtex_use = 2;

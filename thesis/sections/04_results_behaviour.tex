@@ -1,0 +1,165 @@
+% =====================================================================
+%  4 Results I: behaviour (RQ1, RQ2)
+%  Sources: reports/v3_identity_vs_baseline.md 5 (standard metrics),
+%  reports/v2_behavioural_analysis.md (sections 1-9),
+%  reports/v3_runB_results.md 1 (place controls),
+%  S/results/v2/analysis/behaviour_*.csv, v3_region_vs_place.csv.
+%  Numbers in the tables are copied from those reports: re-check against
+%  the CSVs before submission.
+% =====================================================================
+\section{Results I: How Demographic Framing Changes Judgments}
+\label{sec:behaviour}
+
+% ---------------------------------------------------------------------
+\subsection{Unframed baseline}
+\label{sec:behaviour:baseline}
+% Both models rank texts reasonably (AUC > 0.8) but over-flag:
+% recall 0.99, precision about 0.26. Over-flagging matters later: any
+% method that lowers P(yes) "improves" distance to raters.
+\fillin{Baseline performance on all texts; over-flagging.}
+
+\begin{table}[t]
+  \centering
+  \caption{Unframed prompt on all \num{4519} \dthree{} texts. Majority label: at least half
+    of the raters call the text offensive (21.7\% of texts).}
+  \label{tab:standard-metrics}
+  \src{v3\_identity\_vs\_baseline.md §5}
+  \begin{tabular}{lcc}
+    \toprule
+                              & \llamashort & \qwenshort \\
+    \midrule
+    texts flagged             & 78.7\% & 85.0\% \\
+    accuracy                  & 0.42 & 0.37 \\
+    precision                 & 0.27 & 0.25 \\
+    recall                    & 0.99 & 0.99 \\
+    F1 (offensive)            & 0.43 & 0.40 \\
+    macro-F1                  & 0.42 & 0.36 \\
+    ROC-AUC                   & 0.83 & 0.82 \\
+    Brier vs raters' share    & 0.26 & 0.35 \\
+    Spearman vs raters' share & 0.66 & 0.67 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Demographic framings against placebos}
+\label{sec:behaviour:placebo}
+% - Variance between phrases is as large as between items.
+% - Placebos: negative length slope in every variant; Qwen placebos push
+%   towards "offensive" (+2.3 to +3.8), Llama placebos near 0; tea outlier.
+% - Region beats the length-adjusted placebo line in all 10 variants.
+%   Gender, religion, bare identity: not distinguishable (low power with
+%   2 phrases: say "not distinguishable", not "no effect").
+% - Exception: Llama context variants, gender +1.07 (p = 0.007).
+% - Single regions: Sub-Saharan Africa strongest in both models.
+\fillin{Placebo behaviour, then the headline comparison.}
+
+\begin{table}[t]
+  \centering
+  \caption{Demographic framings minus content-free placebos, adjusted for phrase length
+    (\variant{prefix}, log-odds). $p$-values treat the phrase as the unit.}
+  \label{tab:identity-vs-placebo}
+  \src{v2\_behavioural\_analysis.md §2}
+  \begin{tabular}{lrrrr}
+    \toprule
+    & \multicolumn{2}{c}{\llamashort} & \multicolumn{2}{c}{\qwenshort} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    axis (phrases)           & diff & $p$ & diff & $p$ \\
+    \midrule
+    all demographics (14)    & $+1.21$ & $<0.001$ & $+2.38$ & $<0.001$ \\
+    region (8)               & $\bm{+1.62}$ & $\bm{<0.001}$ & $\bm{+2.78}$ & $\bm{0.001}$ \\
+    gender (2)               & $+0.22$ & 0.59 & $+0.27$ & 0.79 \\
+    religion (2)             & $-0.10$ & 0.80 & $+1.17$ & 0.33 \\
+    bare identity (2)        & $+0.70$ & 0.13 & $+0.96$ & 0.34 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% Optional second table / figure: per-region effects (v2 report §2), or a
+% figure of the shift per condition with the placebo length line.
+\begin{figure}[t]
+  \centering
+  \placeholderfig{Shift per condition vs phrase length, placebo regression line,
+    demographics coloured by axis; one panel per model (\variant{prefix}).}
+  \caption{\fillin{Caption.}}
+  \label{fig:length-null}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{Prompt format}
+\label{sec:behaviour:format}
+% - Paraphrases agree (rho 0.83 to 0.99).
+% - Suffix pulls everything down; in Qwen it reverses the identity effect
+%   (-2.2 log-odds).
+% - Target measures topic relevance (placebos collapse), report it
+%   separately from perspective formats.
+% - Context makes Llama use gender.
+% - Flip rates: Llama 29% vs 21%, Qwen 38% vs 34% (prefix).
+\fillin{How the format changes size and even sign of the effect.}
+
+\begin{table}[t]
+  \centering
+  \caption{Mean \pyes{} for demographic and placebo framings per format
+    (unframed mean: \llamashort{} 0.47, \qwenshort{} 0.53).}
+  \label{tab:formats}
+  \src{v2\_behavioural\_analysis.md §5}
+  \begin{tabular}{lcccc}
+    \toprule
+    & \multicolumn{2}{c}{\llamashort} & \multicolumn{2}{c}{\qwenshort} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    format & demographic & placebo & demographic & placebo \\
+    \midrule
+    \variant{prefix}        & 0.66 & 0.47 & 0.87 & 0.70 \\
+    \variant{infix}         & 0.64 & 0.39 & 0.76 & 0.58 \\
+    \variant{suffix}        & 0.24 & 0.17 & 0.22 & 0.53 \\
+    \variant{embedded}      & 0.50 & 0.27 & 0.65 & 0.50 \\
+    \variant{target}        & 0.50 & 0.16 & 0.51 & 0.15 \\
+    \variant{context}       & 0.74 & 0.54 & 0.75 & 0.65 \\
+    \variant{context\_long} & 0.67 & 0.49 & 0.84 & 0.77 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Identity or place name?}
+\label{sec:behaviour:place}
+% Region minus its two place controls ("researching / mapping X").
+% Llama: about half is identity (prefix +0.73, infix +1.01).
+% Qwen: perspective formats are the place name (prefix +0.02);
+% identity part only after the text (infix +1.17, embedded +1.16).
+\fillin{Place-name controls and what they change about the region result.}
+
+\begin{table}[t]
+  \centering
+  \caption{Region framing minus its two place-name controls (log-odds, mean over 4 regions;
+    $p$ with the phrase as the unit).}
+  \label{tab:place}
+  \src{v3\_runB\_results.md §1}
+  \begin{tabular}{lrrrr}
+    \toprule
+    & \multicolumn{2}{c}{\llamashort} & \multicolumn{2}{c}{\qwenshort} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    format & diff & $p$ & diff & $p$ \\
+    \midrule
+    \variant{prefix}   & $+0.73$ & 0.013 & $+0.02$ & 0.92 \\
+    \variant{infix}    & $+1.01$ & 0.003 & $+1.17$ & 0.007 \\
+    \variant{suffix}   & $-0.05$ & 0.67  & $-0.02$ & 0.90 \\
+    \variant{embedded} & $+0.45$ & 0.07  & $+1.16$ & 0.016 \\
+    \variant{target}   & $+0.75$ & 0.11  & $+5.09$ & 0.02 \\
+    \variant{context}  & $+0.76$ & 0.06  & $-0.38$ & 0.03 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Do the shifts match the real groups?}
+\label{sec:behaviour:alignment}
+% RQ2.
+% - Absolute distance (prefix): Llama 0.35 -> 0.51 framed (0.34 matched
+%   placebo); Qwen 0.40 -> 0.68 (0.50).
+% - Relative: 0 of 240 tests significant; mean Spearman 0.02 / 0.00.
+% - Region order: Llama matches the stable average offsets (rho 0.81,
+%   n = 8) with twice the spread; Qwen 0.05 (v3_identity_vs_baseline.md 4).
+%   This replaces the v2 value 0.36 that used noisy per-text gaps.
+\fillin{Absolute and relative alignment with real group ratings.}
+\src{v2 §8; v3\_identity §4}

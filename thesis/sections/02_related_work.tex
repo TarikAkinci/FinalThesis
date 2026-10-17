@@ -1,0 +1,88 @@
+% =====================================================================
+%  2 Related Work / Background
+%  Sources: reports/Final Thesis Cross-Cultural Disagreement ... .md
+%  (Notion export, main list), reports/key_points_thesis_proposal.md,
+%  reports/technical_papers_sum.md (PASTA, FairSteer, political steering,
+%  TDD), reports/paper_summaries.md, reports/v3_step1_explained.md (good
+%  plain-language explanation of attention, heads and steering).
+%  End each subsection with one sentence on how this thesis differs.
+% =====================================================================
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Annotator disagreement and perspectivism}
+\label{sec:related:disagreement}
+% - Disagreement as signal: Denton et al. 2021 (whose ground truth),
+%   Uma et al. 2021 (learning from disagreement survey), Plank 2022
+%   (human label variation).
+% - Cultural and moral correlates: D3CODE (Davani et al. 2024),
+%   Davani et al. 2024 FAccT (care-high raters stricter; Perspective API
+%   aligns with WEIRD values), Lee et al. 2024 (cross-cultural hate speech,
+%   sarcasm and local topics drive disagreement).
+% - Modelling groups: jury learning (Gordon et al. 2022), GRASP
+%   (Prabhakaran et al. 2024, group association metrics), Maurer et al.
+%   2026 (text x annotator interaction), Muhumuza et al. 2026 (HateXplain).
+% - Demographics explain little variance: Hu & Collier 2024.
+% How we differ: we test whether the group signal is reliable at the item
+% level before asking a model to reproduce it (section 7).
+\fillin{Disagreement, perspectivism, D3CODE and moral correlates.}
+\citep{denton2021whose,uma2021learning,plank2022problem,davani2024d3code,davani2024disentangling,lee2024exploring,gordon2022jury,prabhakaran2024grasp}
+
+\subsection{LLMs as offensiveness judges and persona prompting}
+\label{sec:related:persona}
+% - Overconfidence on contested items: Lu et al. 2025.
+% - Persona effect is small and bounded by how much demographics explain:
+%   Hu & Collier 2024. More attributes can hurt: Kamruzzaman et al. 2025.
+% - Persona prompting barely changes LLM bias patterns: Giorgi 2025;
+%   persona effects depend on the perspectivism setting: Sarumi et al. 2025.
+% - LLMs fail to predict group differences in safety ratings: Movva et
+%   al. 2024. Country prompts do not change GPT-4 labels: Lee et al. 2024.
+% - Persona prompting can introduce bias: Salewski et al. 2023, Gupta et
+%   al. 2024; anti-Muslim bias: Abid et al. 2021. Robust persona-aware
+%   toxicity detection with ensembling: Atil et al. 2025.
+% How we differ: content-free, length-matched controls; place-name
+% controls; mechanism, not only behaviour.
+\fillin{LLMs as judges, persona prompting, what is known about its effect.}
+\citep{lu2025overconfident,hu2024quantifying,kamruzzaman2025demographic,giorgi2025human,sarumi2025impact,movva2024annotation,salewski2023incontext,gupta2024bias}
+
+\subsection{Prompt sensitivity}
+\label{sec:related:prompt}
+% - Recency and majority-label bias, calibration: Zhao et al. 2021.
+% - Position effects in long contexts: Liu et al. 2024.
+% - Relevance for us: any inserted sentence moves the answer; suffix
+%   placement reverses effects in Qwen; phrase length matters.
+\fillin{Prompt-format effects and why a content-free control is needed.}
+\citep{zhao2021calibrate,liu2024lost}
+
+\subsection{Attention analysis and interpretability}
+\label{sec:related:attention}
+% - Attention as explanation debate: Jain & Wallace 2019; Wiegreffe &
+%   Pinter 2019. Our profiling result (correlational candidates overlap
+%   causal heads barely above chance) fits this debate.
+% - Value-weighted attention (norm-based): Kobayashi et al. 2020.
+% - Attention sinks: Xiao et al. 2024 (about 80% of attention goes to the
+%   first token in our pilots).
+% - Personas inside the model: Ghandeharioun et al. 2024 (layer-wise
+%   persona representations). Prompt influence / token attribution:
+%   Feng et al. 2024 (TDD).
+\fillin{Attention analysis, its limits, sinks, value-weighted attention, persona mechanisms.}
+\citep{jain2019attention,wiegreffe2019attention,kobayashi2020attention,xiao2024efficient,ghandeharioun2024whos,feng2024unveiling}
+
+\subsection{Steering language models}
+\label{sec:related:steering}
+% - Attention steering: PASTA (Zhang et al. 2024): upweight attention to a
+%   user-marked span in selected heads, heads chosen by profiling.
+% - Activation steering: ActAdd (Turner et al. 2023), contrastive
+%   activation addition (Rimsky et al. 2024).
+% - Steering for bias and fairness: FairSteer (Li et al. 2025), political
+%   views steering papers (see reports/technical_papers_sum.md, add bib
+%   entries once you decide to cite them).
+% How we differ: we steer a demographic span and judge success against
+% real group ratings AND a constant-shift baseline.
+\fillin{Attention steering (PASTA), activation steering, steering for bias.}
+\citep{zhang2024pasta,turner2023activation,rimsky2024steering,li2025fairsteer}
+
+\subsection{Positioning}
+% One paragraph: the combination nobody has done (behavioural controls +
+% mechanism + steering + reliability of the group signal) on one dataset.
+\fillin{What this thesis adds relative to the work above.}

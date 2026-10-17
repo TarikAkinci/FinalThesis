@@ -1,0 +1,58 @@
+% =====================================================================
+%  Bachelor thesis, Tarik Akinci
+%  Build: latexmk (LaTeX Workshop in VS Code does this on save).
+%  Engine: pdflatex + biber. Output goes to thesis/build/.
+%
+%  Where things are:
+%    preamble.tex            packages, macros (\fillin, \src, \todo, \llama, ...)
+%    frontmatter/            title page, declaration, abstract
+%    sections/               one file per section, in reading order
+%    appendix/               appendix sections
+%    references.bib          bibliography (entries marked VERIFY need checking)
+%    figures/                put new thesis figures here
+%
+%  Structure follows reports/proposal_sketch.md (abstract, introduction
+%  P1-P5, RQs, contributions, method, evidence, limits), expanded into the
+%  usual paper layout and the outline in CLAUDE.md section 10.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\input{preamble}
+
+\begin{document}
+
+\pagenumbering{roman}
+\input{frontmatter/titlepage}
+\input{frontmatter/abstract}
+\clearpage
+\tableofcontents
+\clearpage
+\ifdraft
+  \listoftodos[Open TODOs (draft only)]
+  \clearpage
+\fi
+
+\pagenumbering{arabic}
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_data_and_method}
+\input{sections/04_results_behaviour}
+\input{sections/05_results_mechanism}
+\input{sections/06_results_steering}
+\input{sections/07_results_group_signal}
+\input{sections/08_discussion}
+\input{sections/09_conclusion}
+
+\clearpage
+\printbibliography[heading=bibintoc]
+
+\clearpage
+\appendix
+\input{appendix/A_pilot_studies}
+\input{appendix/B_prompts_and_conditions}
+\input{appendix/C_additional_results}
+\input{appendix/D_reproducibility}
+
+\clearpage
+\input{frontmatter/declaration}
+
+\end{document}

@@ -1,0 +1,97 @@
+% =====================================================================
+%  7 Results IV: is there a group signal to align with?
+%  Sources: reports/v3_identity_vs_baseline.md 2, 3, 4, 6.
+%  This section explains WHY no method creates alignment.
+% =====================================================================
+\section{Results IV: Is There a Group Signal to Align With?}
+\label{sec:groupsignal}
+
+% ---------------------------------------------------------------------
+\subsection{Text-by-text group differences}
+\label{sec:groupsignal:items}
+% Method: split each text's raters into two disjoint random halves,
+% compute the group gap (group share - rest share) in each half, correlate.
+% Result: about 0 for every group, same as random pseudo-groups; faint
+% signal for Sinosphere and Sub-Saharan Africa. Partly a sample-size
+% limit (2-7 raters per region and text).
+\fillin{Split-half reliability of item-level group gaps.}
+
+\begin{table}[t]
+  \centering
+  \caption{Reliability of per-text group gaps: Spearman correlation between two disjoint halves
+    of each group's raters.}
+  \label{tab:reliability}
+  \src{v3\_identity\_vs\_baseline.md §2}
+  \begin{tabular}{lrcc}
+    \toprule
+    group & texts & mean $|$gap$|$ & split-half $\rho$ \\
+    \midrule
+    Arab Culture           & \num{1041} & 0.147 & 0.00 \\
+    Indian Cultural Sphere & \num{1141} & 0.148 & 0.01 \\
+    Latin America          & \num{1058} & 0.151 & 0.02 \\
+    North America          & \num{1014} & 0.138 & 0.05 \\
+    Oceania                & \num{1016} & 0.137 & 0.03 \\
+    Sinosphere             & \num{1242} & 0.161 & 0.10 \\
+    Sub-Saharan Africa     & \num{1039} & 0.163 & 0.11 \\
+    Western Europe         & \num{1039} & 0.135 & 0.01 \\
+    man                    & \num{3297} & 0.129 & 0.01 \\
+    woman                  & \num{3321} & 0.128 & 0.00 \\
+    \midrule
+    random pseudo-group, 1/8 & \num{1562} & 0.157 & 0.02 \\
+    random pseudo-group, 1/2 & \num{3258} & 0.130 & 0.02 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Average group offsets}
+\label{sec:groupsignal:offsets}
+% Regions differ on average (p = 1e-37): Arab Culture +6.6 points,
+% Latin America +5.6, Sub-Saharan Africa +2.3, Indian Cultural Sphere
+% +1.9, Western Europe -2.0, North America -2.5, Sinosphere -5.6,
+% Oceania -6.5. Gender does not (-0.5 / +0.6, p = 0.06).
+% Llama gets the order right (rho 0.81, n = 8) with twice the spread;
+% Qwen 0.05.
+\fillin{Average regional strictness and whether the models reproduce it.}
+
+\begin{figure}[t]
+  \centering
+  \placeholderfig{Real regional offsets (points) vs each model's region effect, 8 regions,
+    one panel per model.}
+  \caption{\fillin{Caption.}}
+  \label{fig:offsets}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{Moral foundations and within-group disagreement}
+\label{sec:groupsignal:moral}
+% Median splits on each MFQ-2 foundation: same pattern (split-half 0.00
+% to 0.07; offsets up to +5.6 points for high care).
+% Within-region entropy 0.64 vs 0.80 among all raters of a text: most
+% disagreement stays inside a region.
+% Consequence: a moral-values framing experiment would likely repeat the
+% demographic result, so it was not run.
+\fillin{Moral-foundation groups and within-group disagreement.}
+
+\begin{table}[t]
+  \centering
+  \caption{Moral-foundation groups (median split): reliability of per-text gaps and average offset
+    (high minus low half, Mann--Whitney).}
+  \label{tab:moral}
+  \src{v3\_identity\_vs\_baseline.md §6}
+  \begin{tabular}{lrcrr}
+    \toprule
+    split & texts & split-half $\rho$ & offset (points) & $p$ \\
+    \midrule
+    high care            & \num{3279} & 0.02 & $+5.6$ & $7\times10^{-18}$ \\
+    high equality        & \num{3221} & 0.05 & $+2.1$ & $8\times10^{-3}$ \\
+    high proportionality & \num{3146} & 0.00 & $+2.6$ & $2\times10^{-4}$ \\
+    high authority       & \num{3141} & 0.06 & $+3.8$ & $2\times10^{-8}$ \\
+    high loyalty         & \num{3092} & 0.01 & $+3.7$ & $3\times10^{-7}$ \\
+    high purity          & \num{3341} & 0.07 & $+2.9$ & $8\times10^{-5}$ \\
+    woman vs rest        & \num{3321} & 0.00 & $+1.3$ & 0.05 \\
+    \midrule
+    random half (null)   & \num{3258} & 0.02 & $-0.1$ & 0.9 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

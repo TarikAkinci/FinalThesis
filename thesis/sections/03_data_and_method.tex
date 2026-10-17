@@ -1,0 +1,259 @@
+% =====================================================================
+%  3 Data and Experimental Setup
+%  Sources: CLAUDE.md section 11 (design details), S/master_grid.py
+%  (prompts, conditions, spans), S/select_items.py (selection),
+%  reports/v3_plan.md (decisions, success criterion),
+%  reports/v3_step1_explained.md (attention and steering explained),
+%  reports/v2_behavioural_analysis.md section 1 (statistical design).
+%  S/ = D3code-main/scripts/
+% =====================================================================
+\section{Data and Experimental Setup}
+\label{sec:method}
+
+% Short roadmap: data -> models and scoring -> items -> prompts and
+% conditions -> attention measures -> profiling -> steering -> evaluation.
+\fillin{One-paragraph overview of the pipeline (maybe a pipeline figure).}
+
+% ---------------------------------------------------------------------
+\subsection{Dataset}
+\label{sec:method:data}
+% - D3CODE (Davani et al. 2024): texts, raters, regions, countries,
+%   5-point Likert scale -> binarised how? (check: we use "offensive" =
+%   rating >= ? ; see S/analysis_v2_behaviour.py, D3_RATINGS_CSV and the
+%   group share computation).
+% - Rater attributes: region (8), gender, age, SES, MFQ-2 moral
+%   foundations (6).
+% - Numbers below: CLAUDE.md section 9 "Data".
+\fillin{Describe D3CODE, the rating scale, how a rating is binarised, the rater attributes.}
+\src{CLAUDE.md §9 Data}
+
+\begin{table}[t]
+  \centering
+  \caption{\dthree{} at a glance, and the 500 texts used in the main experiments.}
+  \label{tab:data}
+  \begin{tabular}{lrr}
+    \toprule
+                                        & all \dthree{}   & our 500 texts \\
+    \midrule
+    texts (unique, $\geq 10$ raters)    & \num{4519}      & 500 \\
+    raters                              & \num{4309}      & \fillin{n} \\
+    ratings                             & $\approx$\num{145000} & \fillin{n} \\
+    cultural regions                    & 8               & 8 \\
+    share of ratings ``offensive''      & 0.32            & \fillin{x} \\
+    mean offensive share per text       & 0.34            & 0.21 \\
+    texts majority-offensive            & 21.7\%          & 13 texts \\
+    mean rating entropy                 & 1.77            & 1.49 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Models and scoring}
+\label{sec:method:models}
+% - \llama{} and \qwen{}, chat templates, bf16 weights, single forward
+%   pass, no generation.
+% - P(yes) from the two answer-token logits, computed in fp32 from the
+%   final hidden state (DecisionHead): bf16 output logits quantise P(yes)
+%   in steps of 0.06 to 0.125 log-odds (CLAUDE.md section 13).
+% - Shift = log-odds(framed) - log-odds(unframed), per text.
+We evaluate \llama{} \citep{grattafiori2024llama} and \qwen{} \citep{qwen2025qwen25}.
+\fillin{Prompting setup, chat template, single forward pass.}
+For a prompt $x$, let $z_0$ and $z_1$ be the logits of the answer tokens
+``0'' and ``1'' at the last position. We define
+\begin{equation}
+  \pyes = \frac{\exp z_1}{\exp z_0 + \exp z_1},
+  \qquad
+  \ell(x) = \log\frac{\pyes}{1-\pyes} = z_1 - z_0 ,
+  \label{eq:pyes}
+\end{equation}
+and measure the effect of a framing $c$ on text $t$ as the shift
+$\Delta_c(t) = \ell(x_c(t)) - \ell(x_\varnothing(t))$ relative to the unframed prompt.
+\fillin{Why log-odds and not probabilities (no ceiling compression).}
+
+% ---------------------------------------------------------------------
+\subsection{Item selection}
+\label{sec:method:items}
+% - All 4,519 texts scored with both models (S/select_items.py score).
+% - Band: unframed P(yes) in [0.02, 0.98] for BOTH models (ceiling effect
+%   found in the pilots, appendix A). 554 texts qualify.
+% - 500 drawn with category quotas: 153 social-group (all available),
+%   275 random, 72 moral. Split A (selection, 250) / B (held out, 250),
+%   stratified by category. Frozen list: S/items/items_v2.csv.
+% - Same items for both models (equal-conditions rule).
+\fillin{Selection procedure and its rationale.}
+\src{S/select\_items.py}
+
+% ---------------------------------------------------------------------
+\subsection{Prompt formats}
+\label{sec:method:prompts}
+% Full texts of all 10 formats in appendix B. Explain the three families:
+% perspective (prefix, reworded, imagine, consider, context, context_long),
+% position (infix, suffix), and question type (embedded vs target:
+% "as X, is it offensive?" vs "is it offensive for X?").
+The unframed prompt is
+\begin{promptbox}
+Text: "\{text\}"\\
+Is this text offensive? Answer with only 0 (no) or 1 (yes).
+\end{promptbox}
+\Cref{tab:variants} lists how a framing is inserted.
+\fillin{Rationale for each family of formats.}
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Prompt formats. \texttt{X} is the condition phrase (\cref{tab:conditions}),
+    \texttt{<base>} the unframed prompt, \texttt{<instr>} its question line.}
+  \label{tab:variants}
+  \begin{tabularx}{\linewidth}{l>{\ttfamily\raggedright\arraybackslash}X}
+    \toprule
+    format & \normalfont template \\
+    \midrule
+    \variant{prefix}       & You are X. <base> \\
+    \variant{reworded}     & Assume you are X. <base> \\
+    \variant{imagine}      & Imagine you are X. <base> \\
+    \variant{consider}     & Consider that you are X. <base> \\
+    \variant{context}      & You are X. Your background and everyday experience shape how you read things. <base> \\
+    \variant{context\_long}& \ldots{} as context + Answer from that perspective. <base> \\
+    \variant{infix}        & Text: "\ldots" / You are X. <instr> \\
+    \variant{suffix}       & <base> You are X. \\
+    \variant{embedded}     & Text: "\ldots" / As X, is this text offensive? \ldots \\
+    \variant{target}       & Text: "\ldots" / Do you think this text is offensive for X? \ldots \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Conditions and controls}
+\label{sec:method:conditions}
+% - 14 demographic phrases, 8 content-free placebos (hobbies and habits,
+%   nothing a rater attribute could encode), 2 per noun length.
+% - Exact token-length matching across both tokenizers in all formats
+%   (S/check_matching.py).
+% - Place-name controls (run B): same place tokens, no belonging.
+% - Full factorial: 22 conditions x 10 formats x 500 texts = 110,000
+%   framed prompts + 500 unframed per model.
+\fillin{Conditions, placebo design principles, length matching, place controls.}
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Condition phrases. Placebos come in pairs per noun length; place-name
+    controls keep the region's tokens but drop the belonging.}
+  \label{tab:conditions}
+  \begin{tabularx}{\linewidth}{lX}
+    \toprule
+    axis & phrases \\
+    \midrule
+    region (8)   & someone from Western Europe / North America / Latin America / the Arab Culture region /
+                   the Indian Cultural Sphere / the Sinosphere / Sub Saharan Africa / Oceania \\
+    gender (2)   & a man, a woman \\
+    religion (2) & a Christian, a Muslim \\
+    identity (2) & an Arab, a European \\
+    \midrule
+    placebo (8)  & a runner, a cyclist, an early riser, someone who plays chess, someone who collects
+                   old maps, someone who enjoys crossword puzzles, someone who usually takes the stairs,
+                   someone who prefers tea over coffee \\
+    \midrule
+    place (8)    & someone researching / mapping $\langle$region$\rangle$, for Western Europe, Latin America,
+                   the Arab Culture region, Sub Saharan Africa \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ---------------------------------------------------------------------
+\subsection{Attention measures}
+\label{sec:method:attention}
+% - Attention of the last (decision) position to four segments: identity
+%   phrase, instruction, item text, other (incl. sink and template).
+% - Sink heads flagged and excluded (Xiao et al. 2024).
+% - Value-weighted attention (Kobayashi et al. 2020): alpha_ij * ||v_j W_O||,
+%   computed via the Gram matrix of W_O^h (S/master_grid.py ValueNorms).
+% - Per token (divide by span length) because phrase length drives raw
+%   attention.
+For head $h$ in layer $l$, let $\alpha^{l,h}_{ij}$ be the attention weight from
+position $i$ to $j$. The share of segment $S$ at the decision position $n$ is
+\begin{equation}
+  A^{l,h}(S) = \sum_{j \in S} \alpha^{l,h}_{nj},
+  \qquad
+  \tilde A^{l,h}(S) = \frac{\sum_{j\in S} \alpha^{l,h}_{nj}\,\lVert v^{l,h}_j W^{l,h}_O\rVert}
+                           {\sum_{j} \alpha^{l,h}_{nj}\,\lVert v^{l,h}_j W^{l,h}_O\rVert},
+  \label{eq:attention}
+\end{equation}
+where $\tilde A$ is the value-weighted variant \citep{kobayashi2020attention}.
+\fillin{Sink handling, per-token normalisation, the correlational candidate rule (step 1).}
+
+% ---------------------------------------------------------------------
+\subsection{Causal head profiling}
+\label{sec:method:profiling}
+% - PASTA single-head steering (Zhang et al. 2024), one head at a time,
+%   on 48 texts of split A, prefix / infix / target.
+% - Head effect = change in log-odds under steering, region vs placebo
+%   and region vs place-name controls ("place_specific").
+% - Two nulls: placebo-pair (stairs vs tea) and place-pair (researching
+%   vs mapping); head passes if beyond the 99th percentile of both.
+% - Dampeners (steering lowers region answer) vs amplifiers; frozen
+%   before split B (S/head_selection_v3.py, results/v3/analysis/heads_rule.txt).
+\fillin{Profiling procedure, nulls, selection rule.}
+\src{reports/v3\_runB\_results.md §2}
+
+% ---------------------------------------------------------------------
+\subsection{Steering}
+\label{sec:method:steering}
+% - Attention steering (PASTA): in the selected heads, at every query
+%   position, multiply attention to the span by strength k and
+%   renormalise. Strengths 0, 0.5, 2, 4, 10, 100 (k = 100 means 0.01 on
+%   everything else in PASTA's parameterisation).
+% - Arms: dampeners, amplifiers (identity span), text steering (item
+%   text, top 10 heads from text profiling), activation steering
+%   (mean framed - unframed hidden state, middle layer 16 / 14, answer
+%   position), random head sets with the same layer mix (3 per setting).
+% - Upper bounds: remove identity attention in all heads at the answer
+%   position only vs at all positions.
+% - All on split B, prefix / infix / target, 4 regions + gender +
+%   religion + placebos + place controls + unframed.
+In the steered heads $H$, attention weights to the span $S$ are rescaled at every
+query position $i$ and renormalised:
+\begin{equation}
+  \hat\alpha^{l,h}_{ij} = \frac{k^{\mathbb 1[j\in S]}\,\alpha^{l,h}_{ij}}
+                               {\sum_{j'} k^{\mathbb 1[j'\in S]}\,\alpha^{l,h}_{ij'}},
+  \qquad (l,h)\in H,
+  \label{eq:pasta}
+\end{equation}
+with strength $k$ \citep{zhang2024pasta}. For activation steering we add
+$\lambda\,\bar{\bm d}$ to the residual stream at layer $l^\ast$ and the answer position, where
+$\bar{\bm d}$ is the mean difference between framed and unframed hidden states
+\citep{turner2023activation}.
+\fillin{Check that \cref{eq:pasta} matches S/ablation\_heads.py exactly (multiplying the span vs dividing the rest is equivalent after renormalisation); describe arms and controls.}
+
+% ---------------------------------------------------------------------
+\subsection{Evaluation and statistics}
+\label{sec:method:eval}
+% - Phrase as the statistical unit for content claims (phrases are the
+%   same on every item, item-level p-values are too optimistic).
+% - Length-adjusted placebo null: regression of placebo shifts on phrase
+%   length, demographic compared to the line.
+% - Partial Spearman controlling for item-text length and baseline.
+% - BH-FDR where many tests.
+% - Distance to real raters (success criterion, supervisor 10 Oct):
+%   D = mean_t |P(yes) - s_g(t)| on split B, texts with >= 4 group raters.
+% - Constant-shift baseline: one log-odds offset fitted on split A.
+% - Standard metrics: precision, recall, F1, macro-F1, ROC-AUC, Brier.
+The success criterion for steering is the mean absolute distance to the real group
+\begin{equation}
+  D_g = \frac{1}{|T_g|}\sum_{t\in T_g}\bigl|\,\pyes(x_g(t)) - s_g(t)\bigr| ,
+  \label{eq:distance}
+\end{equation}
+where $s_g(t)$ is the share of group $g$'s raters who rate $t$ as offensive and
+$T_g$ are the held-out texts with at least four raters from $g$.
+\fillin{Statistical units, nulls, the constant-shift baseline, standard metrics.}
+
+% ---------------------------------------------------------------------
+\subsection{Pilot studies}
+\label{sec:method:pilots}
+% Short: what v1 found and which design choice each lesson led to
+% (details in appendix A):
+%   ceiling effect -> baseline band; one odd placebo -> placebo pool;
+%   phrase length -> exact token matching; unequal item sets -> shared
+%   list; bf16 rounding -> fp32 decision logits; span bug -> search from
+%   the end.
+\fillin{Two or three sentences, pointer to \cref{app:pilots}.}
